@@ -17,8 +17,8 @@ const FeaturedPosts = () => {
     queryFn: fetchPost,
   });
 
-  if (isPending) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isPending) return <div>Chargement...</div>;
+  if (error) return <div>Erreur: {error.message}</div>;
 
   const posts = data.posts;
   if (!posts || posts.length === 0) return "Post not found";

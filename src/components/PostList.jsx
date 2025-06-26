@@ -52,7 +52,7 @@ const PostList = () => {
           dataLength={allPosts.length} //This is important field to render the next data
           next={fetchNextPage}
           hasMore={!!hasNextPage}
-          loader={<h4>Loading More Posts</h4>}
+          loader={<h4>Chargement de plus de posts...</h4>}
           // endMessage={
           //   <p>
           //     <b>All Posts Loaded!</b>

@@ -72,9 +72,9 @@ const Comments = ({ postId }) => {
         </button>
       </form>
       {isPending ? (
-        "Loading..."
+        "Chargement..."
       ) : error ? (
-        "Error loading Comments!"
+        "Erreur lors du chargement des Commentaires!"
       ) : (
         <>
           {newCommentMutation.isPending && (

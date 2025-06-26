@@ -1,8 +1,9 @@
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams, useNavigate } from "react-router";
 import Search from "./Search";
 
 const SideMenu = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const handleFilterChange = (e) => {
     if (searchParams.get("sort") !== e.target.value) {
@@ -14,11 +15,12 @@ const SideMenu = () => {
   };
 
   const handleCategoryChange = (category) => {
-    if (searchParams.get("cat") !== category) {
-      setSearchParams({
-        ...Object.fromEntries(searchParams.entries()),
-        cat: category,
-      });
+    if (category === "general") {
+      navigate("/posts");
+    } else {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("cat", category);
+      navigate(`/posts?${newParams.toString()}`);
     }
   };
 
@@ -71,9 +73,12 @@ const SideMenu = () => {
       </div>
       <h1 className="mt-8 mb-4 text-sm font-medium">Categories</h1>
       <div className="flex flex-col gap-2 text-sm">
-        <Link className="cursor-pointer underline" to="/posts">
+        <span
+          className="cursor-pointer underline"
+          onClick={() => handleCategoryChange("general")}
+        >
           Général
-        </Link>
+        </span>
         <span
           className="cursor-pointer underline"
           onClick={() => handleCategoryChange("voyages")}

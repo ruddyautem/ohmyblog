@@ -20,8 +20,8 @@ const SinglePostPage = () => {
     queryFn: () => fetchPost(slug),
   });
 
-  if (isPending) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isPending) return <div>Chargement...</div>;
+  if (error) return <div>Erreur: {error.message}</div>;
   if (!data) return "Post not found!";
 
   return (
