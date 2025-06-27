@@ -1,0 +1,49 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Setup SSH
+      - name: Configure SSH
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      # 2. Clean previous Vite build
+      - name: Clean build output
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && rm -rf dist"
+
+      # 3. Reset Git tracked changes
+      - name: Reset Git state
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git reset --hard HEAD"
+
+      # 4. Pull latest changes
+      - name: Git pull
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git pull origin main"
+
+      # 5. Install & build (using Bun)
+      - name: Install & build
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
+
+      # 6. Reload PM2
+      - name: Reload PM2
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && pm2 reload pm2.config.cjs --update-env && pm2 save"
+
+      # 7. Remove SSH keys
+      - name: Remove SSH keys
+        run: rm -rf ~/.ssh
