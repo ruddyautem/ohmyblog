@@ -34,7 +34,7 @@ jobs:
           REMOTE_HOST: ${{ secrets.SSH_HOST }}
           REMOTE_USER: ${{ secrets.SSH_USER }}
           SOURCE: "dist/"
-          TARGET: "/home/autem-ohmyblog/htdocs/ohmyblog.autem.dev/dist"
+          TARGET: "/home/autem-ohmyblog/htdocs/ohmyblog.autem.dev/"
           ARGS: "--delete"
           
       # 5. Reload PM2 on VPS
