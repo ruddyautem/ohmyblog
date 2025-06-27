@@ -1,16 +1,13 @@
 name: Deploy to VPS
-
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-
     steps:
       # 1. Setup SSH
       - name: Configure SSH
@@ -18,32 +15,41 @@ jobs:
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_rsa
+          chmod 700 ~/.ssh
+          ls -la ~/.ssh
+          cat ~/.ssh/id_rsa.pub
 
-      # 2. Clean previous Vite build
+      # 2. Test SSH Connection
+      - name: Test SSH Connection
+        run: |
+          ssh -v -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
+
+      # 3. Clean previous Vite build
       - name: Clean build output
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && rm -rf dist"
 
-      # 3. Reset Git tracked changes
+      # 4. Reset Git tracked changes
       - name: Reset Git state
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git reset --hard HEAD"
 
-      # 4. Pull latest changes
+      # 5. Pull latest changes
       - name: Git pull
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git pull origin main"
 
-      # 5. Install & build (using Bun)
+      # 6. Install & build (using Bun)
       - name: Install & build
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
 
-      # 6. Reload PM2
+      # 7. Reload PM2
       - name: Reload PM2
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && pm2 reload pm2.config.cjs --update-env && pm2 save"
 
-      # 7. Remove SSH keys
+      # 8. Remove SSH keys
       - name: Remove SSH keys
         run: rm -rf ~/.ssh
