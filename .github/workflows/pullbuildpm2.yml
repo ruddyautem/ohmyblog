@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Build and Deploy Vite App
 
 on:
   push:
@@ -8,52 +8,42 @@ on:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Build and Deploy to VPS
     runs-on: ubuntu-latest
-    env:
-      SSH_USER: ${{ secrets.SSH_USER }}
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      WORK_DIR: /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
 
     steps:
-      - name: Setup SSH with debug
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -vvv -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
-          echo "Host *" > ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-          echo "  LogLevel DEBUG3" >> ~/.ssh/config
-          chmod 600 ~/.ssh/config
+      # 1. Checkout your code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Print SSH key fingerprint (debug)
-        run: |
-          ssh-keygen -lf ~/.ssh/id_rsa
+      # 2. Setup Bun
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
-      - name: Test SSH connection
+      # 3. Install and Build
+      - name: Install and Build
         run: |
-          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "echo '✅ SSH connection successful'"
+          bun install
+          bun run build
 
-      - name: Clean old build
-        run: |
-          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && rm -rf dist"
+      # 4. Deploy to VPS
+      - name: Deploy dist/ to VPS
+        uses: easingthemes/ssh-deploy@v5
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          SOURCE: "dist/"
+          TARGET: "/home/autem-ohmyblog/htdocs/ohmyblog.autem.dev/dist"
+          ARGS: "--delete"
 
-      - name: Reset Git state
-        run: |
-          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && git reset --hard HEAD"
-
-      - name: Pull latest code
-        run: |
-          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && git pull origin main"
-
-      - name: Install deps & build
-        run: |
-          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
-
-      - name: Reload PM2
-        run: |
-          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && pm2 reload pm2.config.cjs --update-env && pm2 save"
-
-      - name: Clean up SSH
-        run: rm -rf ~/.ssh
+      # 5. Reload PM2
+      - name: Reload PM2 on VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            pm2 reload pm2.config.cjs --update-env
+            pm2 save
