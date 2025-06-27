@@ -1,54 +1,53 @@
 name: Deploy to VPS
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+
+    env:
+      WORK_DIR: /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+
     steps:
       # 1. Setup SSH
       - name: Configure SSH
         run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_rsa
-          chmod 700 ~/.ssh
-          ls -la ~/.ssh
+          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+          echo "Host *" > ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
-      # 2. Test SSH Connection
-      - name: Test SSH Connection
-        run: |
-          ssh -v -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
+      # 2. Clean old Vite build
+      - name: Clean dist folder
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && rm -rf dist"
 
-      # 3. Clean previous Vite build
-      - name: Clean build output
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && rm -rf dist"
+      # 3. Reset Git
+      - name: Reset Git
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && git reset --hard HEAD"
 
-      # 4. Reset Git tracked changes
-      - name: Reset Git state
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git reset --hard HEAD"
-
-      # 5. Pull latest changes
+      # 4. Pull latest code
       - name: Git pull
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git pull origin main"
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && git pull origin main"
 
-      # 6. Install & build (using Bun)
-      - name: Install & build
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
+      # 5. Install deps & build
+      - name: Install & Build
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
 
-      # 7. Reload PM2
+      # 6. PM2 reload
       - name: Reload PM2
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && pm2 reload pm2.config.cjs --update-env && pm2 save"
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && pm2 reload pm2.config.cjs --update-env && pm2 save"
 
-      # 8. Remove SSH keys
-      - name: Remove SSH keys
+      # 7. Cleanup SSH
+      - name: Cleanup SSH
         run: rm -rf ~/.ssh
