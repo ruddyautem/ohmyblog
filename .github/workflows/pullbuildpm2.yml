@@ -8,39 +8,40 @@ on:
 
 jobs:
   deploy:
-    name: Deploy
     runs-on: ubuntu-latest
     env:
-      WORKING_DIR: /home/autem/htdocs/autem.dev
-      SSH_CMD: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+      WORK_DIR: /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
 
     steps:
-      # 1. Setup SSH
-      - name: Configure SSH
+      - name: Setup SSH
         run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-      # 2. Clean old build
-      - name: Clean build
-        run: ${{ env.SSH_CMD }} "sudo -u ruddya bash -c 'cd $WORKING_DIR && rm -rf .next'"
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+          echo "Host *" > ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
-      # 3. Reset Git state (but keep untracked files like pm2.config.cjs)
-      - name: Reset local changes (preserve pm2.config.cjs)
-        run: ${{ env.SSH_CMD }} "sudo -u ruddya bash -c 'cd $WORKING_DIR && git reset --hard HEAD'"
+      - name: Test SSH connection
+        run: ssh -vvv $SSH_USER@$SSH_HOST "echo 'SSH connection successful'"
 
-      # 4. Pull latest code
+      - name: Clean build folder
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && rm -rf dist"
+
+      - name: Git reset
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && git reset --hard HEAD"
+
       - name: Git pull
-        run: ${{ env.SSH_CMD }} "sudo -u ruddya bash -c 'cd $WORKING_DIR && git pull origin main'"
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && git pull origin main"
 
-      # 5. Install dependencies & build
       - name: Install & build
-        run: ${{ env.SSH_CMD }} "sudo -u ruddya bash -c 'cd $WORKING_DIR && /home/ruddya/.bun/bin/bun install && /home/ruddya/.bun/bin/bun run build'"
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
 
-      # 6. Reload PM2 with existing config on the VPS
-      - name: PM2 reload
-        run: ${{ env.SSH_CMD }} "sudo -u ruddya bash -c 'cd $WORKING_DIR && pm2 reload pm2.config.cjs --update-env && pm2 save'"
+      - name: Reload PM2
+        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && pm2 reload pm2.config.cjs --update-env && pm2 save"
 
-      # 7. Cleanup SSH keys
-      - name: Remove SSH keys
+      - name: Cleanup SSH keys
         run: rm -rf ~/.ssh
