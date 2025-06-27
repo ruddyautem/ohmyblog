@@ -10,25 +10,25 @@ jobs:
   deploy:
     name: Build and Deploy to VPS
     runs-on: ubuntu-latest
-
+    
     steps:
       # 1. Checkout your code
       - name: Checkout code
         uses: actions/checkout@v4
-
+        
       # 2. Setup Bun
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
-
+        
       # 3. Install and Build
       - name: Install and Build
         run: |
           bun install
           bun run build
-
-      # 4. Deploy to VPS
+          
+      # 4. Deploy dist/ to VPS
       - name: Deploy dist/ to VPS
-        uses: easingthemes/ssh-deploy@v5
+        uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_HOST: ${{ secrets.SSH_HOST }}
@@ -36,14 +36,15 @@ jobs:
           SOURCE: "dist/"
           TARGET: "/home/autem-ohmyblog/htdocs/ohmyblog.autem.dev/dist"
           ARGS: "--delete"
-
-      # 5. Reload PM2
+          
+      # 5. Reload PM2 on VPS
       - name: Reload PM2 on VPS
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
             pm2 reload pm2.config.cjs --update-env
             pm2 save
