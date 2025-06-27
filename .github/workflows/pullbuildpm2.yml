@@ -13,35 +13,35 @@ jobs:
       WORK_DIR: /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_HOST: ${{ secrets.SSH_HOST }}
-
+      
     steps:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
           echo "Host *" > ~/.ssh/config
           echo "  StrictHostKeyChecking no" >> ~/.ssh/config
           chmod 600 ~/.ssh/config
-
+          
       - name: Test SSH connection
-        run: ssh -vvv $SSH_USER@$SSH_HOST "echo 'SSH connection successful'"
-
+        run: ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "echo 'SSH connection successful'"
+        
       - name: Clean build folder
-        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && rm -rf dist"
-
+        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && rm -rf dist"
+        
       - name: Git reset
-        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && git reset --hard HEAD"
-
+        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && git reset --hard HEAD"
+        
       - name: Git pull
-        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && git pull origin main"
-
+        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && git pull origin main"
+        
       - name: Install & build
-        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
-
+        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
+        
       - name: Reload PM2
-        run: ssh $SSH_USER@$SSH_HOST "cd $WORK_DIR && pm2 reload pm2.config.cjs --update-env && pm2 save"
-
+        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && pm2 reload pm2.config.cjs --update-env && pm2 save"
+        
       - name: Cleanup SSH keys
         run: rm -rf ~/.ssh
