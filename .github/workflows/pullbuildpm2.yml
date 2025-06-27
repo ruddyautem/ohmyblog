@@ -8,40 +8,52 @@ on:
 
 jobs:
   deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     env:
-      WORK_DIR: /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_HOST: ${{ secrets.SSH_HOST }}
-      
+      WORK_DIR: /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
+
     steps:
-      - name: Setup SSH
+      - name: Setup SSH with debug
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -vvv -H ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
           echo "Host *" > ~/.ssh/config
           echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "  LogLevel DEBUG3" >> ~/.ssh/config
           chmod 600 ~/.ssh/config
-          
+
+      - name: Print SSH key fingerprint (debug)
+        run: |
+          ssh-keygen -lf ~/.ssh/id_rsa
+
       - name: Test SSH connection
-        run: ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "echo 'SSH connection successful'"
-        
-      - name: Clean build folder
-        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && rm -rf dist"
-        
-      - name: Git reset
-        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && git reset --hard HEAD"
-        
-      - name: Git pull
-        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && git pull origin main"
-        
-      - name: Install & build
-        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
-        
+        run: |
+          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "echo '✅ SSH connection successful'"
+
+      - name: Clean old build
+        run: |
+          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && rm -rf dist"
+
+      - name: Reset Git state
+        run: |
+          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && git reset --hard HEAD"
+
+      - name: Pull latest code
+        run: |
+          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && git pull origin main"
+
+      - name: Install deps & build
+        run: |
+          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && ~/.bun/bin/bun install && ~/.bun/bin/bun run build"
+
       - name: Reload PM2
-        run: ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && pm2 reload pm2.config.cjs --update-env && pm2 save"
-        
-      - name: Cleanup SSH keys
+        run: |
+          ssh -vvv ${{ env.SSH_USER }}@${{ env.SSH_HOST }} "cd ${{ env.WORK_DIR }} && pm2 reload pm2.config.cjs --update-env && pm2 save"
+
+      - name: Clean up SSH
         run: rm -rf ~/.ssh
