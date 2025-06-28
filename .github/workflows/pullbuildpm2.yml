@@ -8,43 +8,63 @@ on:
 
 jobs:
   deploy:
-    name: Build and Deploy to VPS
+    name: Deploy to VPS
     runs-on: ubuntu-latest
-    
+
     steps:
-      # 1. Checkout your code
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      # 2. Setup Bun
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        
-      # 3. Install and Build
-      - name: Install and Build
-        run: |
-          bun install
-          bun run build
-          
-      # 4. Deploy dist/ to VPS
-      - name: Deploy dist/ to VPS
-        uses: easingthemes/ssh-deploy@main
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.SSH_HOST }}
-          REMOTE_USER: ${{ secrets.SSH_USER }}
-          SOURCE: "dist/"
-          TARGET: "/home/autem-ohmyblog/htdocs/ohmyblog.autem.dev/"
-          ARGS: "--delete"
-          
-      # 5. Reload PM2 on VPS
-      - name: Reload PM2 on VPS
+      # Step 1: Pull latest code on the VPS
+      # Connects to the server, navigates to the project directory,
+      # discards any local changes, and pulls the latest code from the main branch.
+      - name: Pull latest code
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            echo "Connecting to VPS and pulling latest code..."
+            cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
+            git reset --hard HEAD
+            git pull origin main
+
+      # Step 2: Install dependencies on the VPS
+      # Uses Bun to install the project dependencies based on the lockfile.
+      - name: Install dependencies
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Installing dependencies with Bun..."
+            cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
+            bun install
+
+      # Step 3: Build the project on the VPS
+      # Runs the build command to generate the static files in the `dist` directory.
+      - name: Build project
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Building the project..."
+            cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
+            bun run build
+
+      # Step 4: Reload the PM2 application
+      # Reloads the application in-place for a zero-downtime update and
+      # saves the process list to ensure it restarts on server reboot.
+      - name: Reload PM2 application
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Reloading PM2 application..."
             cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
             pm2 reload pm2.config.cjs --update-env
             pm2 save
+            echo "Deployment finished successfully!"
