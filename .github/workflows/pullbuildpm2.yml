@@ -1,4 +1,4 @@
-name: Build and Deploy Vite App
+name: Deploy to VPS
 
 on:
   push:
@@ -8,63 +8,59 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to VPS
+    name: Deploy ohmyblog to VPS
     runs-on: ubuntu-latest
 
+    env:
+      WORKING_DIR: /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
+      SSH_CMD: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+
     steps:
-      # Step 1: Pull latest code on the VPS
-      # Connects to the server, navigates to the project directory,
-      # discards any local changes, and pulls the latest code from the main branch.
-      - name: Pull latest code
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "Connecting to VPS and pulling latest code..."
-            cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
-            git reset --hard HEAD
-            git pull origin main
+      # 1. Setup SSH
+      - name: Configure SSH
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      # Step 2: Install dependencies on the VPS
-      # Uses Bun to install the project dependencies based on the lockfile.
-      - name: Install dependencies
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "Installing dependencies with Bun..."
-            cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
-            bun install
+      # 2. Ensure repo exists (in case .git is missing)
+      - name: Ensure .git exists and remote is set
+        run: |
+          ${{ env.SSH_CMD }} "sudo -u ruddya bash -c '
+            cd $WORKING_DIR
+            if [ ! -d .git ]; then
+              git init
+              git remote add origin git@github.com:ruddyautem/ohmyblog.git
+            fi
+          '"
 
-      # Step 3: Build the project on the VPS
-      # Runs the build command to generate the static files in the `dist` directory.
-      - name: Build project
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "Building the project..."
-            cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
-            bun run build
+      # 3. Reset tracked files only (preserve pm2.config.cjs, logs, etc.)
+      - name: Reset Git state to origin/main
+        run: |
+          ${{ env.SSH_CMD }} "sudo -u ruddya bash -c '
+            cd $WORKING_DIR
+            git fetch origin main
+            git reset --hard origin/main
+          '"
 
-      # Step 4: Reload the PM2 application
-      # Reloads the application in-place for a zero-downtime update and
-      # saves the process list to ensure it restarts on server reboot.
-      - name: Reload PM2 application
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "Reloading PM2 application..."
-            cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
+      # 4. Install dependencies with Bun and build
+      - name: Install and Build
+        run: |
+          ${{ env.SSH_CMD }} "sudo -u ruddya bash -c '
+            cd $WORKING_DIR
+            /home/ruddya/.bun/bin/bun install
+            /home/ruddya/.bun/bin/bun run build
+          '"
+
+      # 5. Reload app using PM2
+      - name: Reload PM2
+        run: |
+          ${{ env.SSH_CMD }} "sudo -u ruddya bash -c '
+            cd $WORKING_DIR
             pm2 reload pm2.config.cjs --update-env
             pm2 save
-            echo "Deployment finished successfully!"
+          '"
+
+      # 6. Clean up SSH key from runner
+      - name: Clean SSH keys
+        run: rm -rf ~/.ssh
