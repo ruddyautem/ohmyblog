@@ -23,3 +23,4 @@ dist-ssr
 *.sln
 *.sw?
 .env
+pm2.config.cjs
