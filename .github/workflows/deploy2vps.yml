@@ -1,0 +1,77 @@
+name: Deploy ohmyblog to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy ohmyblog to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Deploy to VPS with safe exclusions
+      - name: Deploy to VPS
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          SOURCE: "."
+          TARGET: "/home/autem-ohmyblog/htdocs/ohmyblog.autem.dev/"
+          EXCLUDE: >
+            .git/,
+            .github/,
+            node_modules/,
+            .env*,
+            *.log,
+            .vscode/,
+            README.md,
+            pm2.config.cjs,
+            ecosystem.config.js
+      # 3. Build frontend & reload PM2 on VPS
+      - name: Build and Restart PM2 on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/autem-ohmyblog/htdocs/ohmyblog.autem.dev
+            # Install dependencies (optional, only if needed)
+            bun install --production || true
+            # Build static frontend
+            bun run build
+            # Create PM2 config if missing
+            if [ ! -f "pm2.config.cjs" ]; then
+              echo "Creating pm2.config.cjs..."
+              cat > pm2.config.cjs << 'EOF'
+            module.exports = {
+              apps: [{
+                name: 'ohmyblog',
+                script: 'serve',
+                env: {
+                  PM2_SERVE_PATH: 'dist',
+                  PM2_SERVE_PORT: 3003,
+                  PM2_SERVE_SPA: 'true', // Important for single-page apps
+                  NODE_ENV: 'production',
+                  HOST: '0.0.0.0', // Explicitly set the host
+                },
+              }],
+            };
+            EOF
+            fi
+            # Start or reload PM2 app
+            if pm2 list | grep -q "ohmyblog"; then
+              pm2 reload pm2.config.cjs --update-env
+            else
+              pm2 start pm2.config.cjs
+            fi
+            pm2 save
+            pm2 status
