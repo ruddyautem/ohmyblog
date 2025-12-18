@@ -43,12 +43,16 @@ const Comment = ({ comment, postId }) => {
             w="40"
           />
         ) : (
-          <img src="/profile.png" className="h-10 w-10 rounded object-cover" />
+          <img 
+            src="/profile.png" 
+            alt={comment.user.username}
+            className="h-10 w-10 rounded object-cover" 
+          />
         )}
         <span className="font-medium">{comment.user.username}</span>
-<span className="text-sm text-gray-500">
-  {format(comment.createdAt, 'fr')}
-</span>
+        <span className="text-sm text-gray-500">
+          {format(comment.createdAt, 'fr')}
+        </span>
         {user &&
           (comment.user.username === user.username || role === "admin") && (
             <span

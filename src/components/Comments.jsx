@@ -57,34 +57,38 @@ const Comments = ({ postId }) => {
   return (
     <div className="mb-12 flex flex-col gap-8 lg:w-3/5">
       <h1 className="text-xl text-gray-500 underline">Commentaires</h1>
-      <form
-        onSubmit={handleSubmit}
-        className="flex w-full items-center justify-between gap-8"
-      >
-        <textarea
-          name="desc"
-          placeholder="Ajouter un commentaire..."
-          id=""
-          className="w-full rounded bg-gray-200 p-4 text-black outline-none focus:ring-2 focus:ring-black"
-        />
-        <button className="cursor-pointer bg-black px-4 py-2 text-white transition-all duration-200 ease-in-out hover:scale-105">
-          Ajouter
-        </button>
-      </form>
+      {user ? (
+        <form
+          onSubmit={handleSubmit}
+          className="flex w-full items-center justify-between gap-8"
+        >
+          <textarea
+            name="desc"
+            placeholder="Ajouter un commentaire..."
+            id=""
+            className="w-full rounded bg-gray-200 p-4 text-black outline-none focus:ring-2 focus:ring-black"
+          />
+          <button className="cursor-pointer bg-black px-4 py-2 text-white transition-all duration-200 ease-in-out hover:scale-105">
+            Ajouter
+          </button>
+        </form>
+      ) : (
+        <p className="text-sm text-gray-500">Connectez-vous pour commenter</p>
+      )}
       {isPending ? (
         "Chargement..."
       ) : error ? (
         "Erreur lors du chargement des Commentaires!"
       ) : (
         <>
-          {newCommentMutation.isPending && (
+          {newCommentMutation.isPending && user && (
             <Comment
               comment={{
                 desc: `${newCommentMutation.variables.desc} (En cours...)`,
                 createdAt: new Date(),
                 user: {
-                  img: user.imageUrl,
-                  username: user.username,
+                  img: user.imageUrl || "",
+                  username: user.username || "Anonymous",
                 },
               }}
             />
