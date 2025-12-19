@@ -6,7 +6,7 @@ import { useSearchParams } from "react-router";
 
 const fetchPosts = async (pageParam, searchParams) => {
   const cleanParams = new URLSearchParams([...searchParams]);
-  cleanParams.delete('__clerk_handshake'); // Remove Clerk's handshake param
+  cleanParams.delete('__clerk_handshake');
 
   const res = await axios.get(`${import.meta.env.VITE_API_URL}/posts`, {
     params: { 
@@ -20,7 +20,8 @@ const fetchPosts = async (pageParam, searchParams) => {
 };
 
 const PostList = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  // ✅ FIX: Remove unused setSearchParams
+  const [searchParams] = useSearchParams();
 
   const { data, error, fetchNextPage, hasNextPage, isFetching } =
     useInfiniteQuery({
@@ -31,15 +32,11 @@ const PostList = () => {
         lastPage.hasMore ? pages.length + 1 : undefined,
     });
 
-  console.log(data);
-
   if (isFetching) return "Chargement...";
 
   if (error) return "An error has occurred: " + error.message;
 
   const allPosts = data?.pages.flatMap((page) => page.posts) || [];
-
-  console.log(data);
 
   return (
     <>
@@ -49,15 +46,10 @@ const PostList = () => {
         </p>
       ) : (
         <InfiniteScroll
-          dataLength={allPosts.length} //This is important field to render the next data
+          dataLength={allPosts.length}
           next={fetchNextPage}
           hasMore={!!hasNextPage}
           loader={<h4>Chargement de plus de posts...</h4>}
-          // endMessage={
-          //   <p>
-          //     <b>All Posts Loaded!</b>
-          //   </p>
-          // }
         >
           {allPosts.map((post) => (
             <PostListItem key={post._id} post={post} />

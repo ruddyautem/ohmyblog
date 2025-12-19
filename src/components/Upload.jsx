@@ -26,16 +26,16 @@ const authenticator = async () => {
 const Upload = ({ children, type, setProgress, setData }) => {
   const ref = useRef(null);
 
-  const onError = (err) => {
-    console.log(err);
+  // ✅ FIX: Remove unused 'err' parameter
+  const onError = () => {
     toast.error("Image upload failed!");
   };
+  
   const onSuccess = (res) => {
-    console.log(res);
     setData(res);
   };
+  
   const onUploadProgress = (progress) => {
-    console.log(progress);
     setProgress(Math.round((progress.loaded / progress.total) * 100));
   };
 

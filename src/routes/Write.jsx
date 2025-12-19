@@ -3,7 +3,7 @@ import axios from "axios";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,22 +14,24 @@ const Write = () => {
   const [cover, setCover] = useState("null");
   const [progress, setProgress] = useState(0);
   const [value, setValue] = useState("");
-  const [img, setImg] = useState("");
-  const [video, setVideo] = useState("");
-
-  useEffect(() => {
-    img && setValue((prev) => prev + `<p><image src="${img.url}"/></p>`);
-  }, [img]);
-
-  useEffect(() => {
-    video &&
-      setValue(
-        (prev) => prev + `<p><iframe class="ql-video" src="${video.url}"/></p>`,
-      );
-  }, [video]);
 
   const navigate = useNavigate();
   const { getToken } = useAuth();
+
+  // ✅ NO useEffect - Direct callback handlers
+  const handleImageUpload = (data) => {
+    setValue((prev) => {
+      if (prev.includes(data.url)) return prev;
+      return prev + `<p><image src="${data.url}"/></p>`;
+    });
+  };
+
+  const handleVideoUpload = (data) => {
+    setValue((prev) => {
+      if (prev.includes(data.url)) return prev;
+      return prev + `<p><iframe class="ql-video" src="${data.url}"/></p>`;
+    });
+  };
 
   const mutation = useMutation({
     mutationFn: async (newPost) => {
@@ -64,7 +66,6 @@ const Write = () => {
       category: formData.get("category"),
       content: value,
     };
-    console.log(data);
     mutation.mutate(data);
   };
 
@@ -117,17 +118,16 @@ const Write = () => {
 
         <textarea
           name="desc"
-          id=""
           placeholder="Courte description"
           className="w-full rounded bg-gray-200 p-4 text-black outline-none focus:ring-2 focus:ring-black"
         />
 
         <div className="flex flex-1">
           <div className="mr-2 flex flex-col gap-2">
-            <Upload type="image" setProgress={setProgress} setData={setImg}>
+            <Upload type="image" setProgress={setProgress} setData={handleImageUpload}>
               🖼️
             </Upload>
-            <Upload type="video" setProgress={setProgress} setData={setVideo}>
+            <Upload type="video" setProgress={setProgress} setData={handleVideoUpload}>
               ▶️
             </Upload>
           </div>
@@ -146,9 +146,6 @@ const Write = () => {
         >
           {mutation.isPending ? "En Cours..." : "Publier"}
         </button>
-
-        {/* {"Progress:" + progress}
-        {mutation.isError && <span>{mutation.error.message}</span>} */}
       </form>
     </div>
   );
