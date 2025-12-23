@@ -14,7 +14,7 @@ const NavLink = ({ label, path, onClick, className = "" }) => (
   <Link
     to={path}
     onClick={onClick}
-    className={`flex h-10 max-w-[224px] items-center justify-center rounded bg-gray-100 text-center hover:bg-black hover:text-white ${className}`}
+    className={`flex h-10 max-w-56 items-center justify-center rounded bg-gray-100 text-center hover:bg-black hover:text-white ${className}`}
   >
     {label}
   </Link>

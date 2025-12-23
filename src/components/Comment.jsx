@@ -34,7 +34,7 @@ const Comment = ({ comment, postId }) => {
   });
 
   return (
-    <div className="mb-8 rounded border-1 border-slate-200 bg-slate-50 p-4">
+    <div className="mb-8 rounded border border-slate-200 bg-slate-50 p-4">
       <div className="flex items-center gap-4">
         {comment.user.img ? (
           <Image
