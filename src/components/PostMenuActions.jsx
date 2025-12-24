@@ -8,6 +8,7 @@ const PostMenuAction = ({ post }) => {
   const { user } = useUser();
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // ✅ CHANGE: Move this up before useQuery
 
   const {
     isPending,
@@ -16,15 +17,25 @@ const PostMenuAction = ({ post }) => {
   } = useQuery({
     queryKey: ["savedPosts"],
     queryFn: async () => {
+      // ✅ CHANGE: Only fetch if user is logged in
+      if (!user) return [];
+
       const token = await getToken();
-      return axios.get(`${import.meta.env.VITE_API_URL}/users/saved`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/users/saved`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      return response.data; // ✅ CHANGE: Return response.data directly, not the whole response
     },
+    enabled: !!user, // ✅ CHANGE: Only run query if user exists
   });
 
   const isAdmin = user?.publicMetadata?.role === "admin" || false;
-  const isSaved = savedPosts?.data?.some((p) => p === post._id || false);
+  // ✅ CHANGE: Fixed the isSaved check - removed the "|| false" which was breaking the logic
+  const isSaved =
+    Array.isArray(savedPosts) && savedPosts.some((p) => p === post._id);
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -38,11 +49,9 @@ const PostMenuAction = ({ post }) => {
       navigate("/");
     },
     onError: (error) => {
-      toast.error(error.response.data);
+      toast.error(error.response?.data?.error || "Failed to delete post");
     },
   });
-
-  const queryClient = useQueryClient();
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -59,12 +68,14 @@ const PostMenuAction = ({ post }) => {
         },
       );
     },
-    onSuccess: (_, wasSaved) => {
+    onSuccess: () => {
+      // ✅ CHANGE: Refetch the saved posts after mutation
       queryClient.invalidateQueries({ queryKey: ["savedPosts"] });
-      toast.success(wasSaved ? "Retiré des favoris!" : "Ajouté aux favoris!");
+      // ✅ CHANGE: Fixed the toast message logic
+      toast.success(isSaved ? "Retiré des favoris!" : "Ajouté aux favoris!");
     },
     onError: (error) => {
-      toast.error(error.response.data);
+      toast.error(error.response?.data?.error || "Failed to save post");
     },
   });
 
@@ -85,9 +96,13 @@ const PostMenuAction = ({ post }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["post", post.slug] });
+      // ✅ CHANGE: Add toast notification for feature toggle
+      toast.success(
+        post.isFeatured ? "Post retiré de la vedette" : "Post mis en vedette",
+      );
     },
     onError: (error) => {
-      toast.error(error.response.data);
+      toast.error(error.response?.data?.error || "Failed to feature post");
     },
   });
 
@@ -103,7 +118,8 @@ const PostMenuAction = ({ post }) => {
     if (!user) {
       return navigate("/login");
     }
-    saveMutation.mutate(isSaved);
+    // ✅ CHANGE: Removed the isSaved argument - not needed
+    saveMutation.mutate();
   };
 
   return (
@@ -115,22 +131,29 @@ const PostMenuAction = ({ post }) => {
         "Saved posts fetching failed!"
       ) : (
         <div
-          className="duration 200 flex cursor-pointer items-center gap-2 py-2 text-sm transition-all ease-in-out hover:scale-105"
+          className="flex cursor-pointer items-center gap-2 py-2 text-sm transition-all duration-200 ease-in-out hover:scale-105"
           onClick={handleSave}
         >
           <img
-            src={`${isSaved ? "bookmark-saved.svg" : "bookmark-unsaved.svg"}`}
-            className=""
+            src={`${isSaved ? "/bookmark-saved.svg" : "/bookmark-unsaved.svg"}`}
+            alt={isSaved ? "Saved" : "Not saved"}
           />
-          <span>{`${!isSaved ? "Ajouter aux favoris" : "Retirer des favoris"}`}</span>
+          <span>{isSaved ? "Retirer des favoris" : "Ajouter aux favoris"}</span>
+          {/* ✅ CHANGE: Add loading state for save mutation */}
+          {saveMutation.isPending && (
+            <span className="text-xs">En cours...</span>
+          )}
         </div>
       )}
       {isAdmin && (
         <div
-          className="duration 200 flex cursor-pointer items-center gap-2 py-2 text-sm transition-all ease-in-out hover:scale-105"
+          className="flex cursor-pointer items-center gap-2 py-2 text-sm transition-all duration-200 ease-in-out hover:scale-105"
           onClick={handleFeature}
         >
-          <img src={`${post.isFeatured ? "fullstar.svg" : "star.svg"}`} />
+          <img
+            src={`${post.isFeatured ? "/fullstar.svg" : "/star.svg"}`}
+            alt={post.isFeatured ? "Featured" : "Not featured"}
+          />
           <span>Mettre en avant</span>
           {featureMutation.isPending && (
             <span className="text-xs">En cours...</span>
@@ -138,8 +161,8 @@ const PostMenuAction = ({ post }) => {
         </div>
       )}
       {user && (post.user.username === user.username || isAdmin) && (
-        <div className="duration 200 flex cursor-pointer items-center gap-2 py-2 text-sm transition-all ease-in-out hover:scale-105">
-          <img src="trash.svg" alt="Delete Post" />
+        <div className="flex cursor-pointer items-center gap-2 py-2 text-sm transition-all duration-200 ease-in-out hover:scale-105">
+          <img src="/trash.svg" alt="Delete Post" />
           <span className="text-red-500" onClick={handleDelete}>
             Supprimer ce post
           </span>
