@@ -4,8 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import "./globals.css";
 import { ReactQueryProvider } from "./ReactQueryProvider";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from "sonner";
 
 import { Montserrat } from 'next/font/google';
 
@@ -38,7 +37,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
-            <ToastContainer position="bottom-right" autoClose={3000} />
+            <Toaster position="bottom-right" richColors closeButton />
           </ReactQueryProvider>
         </body>
       </html>

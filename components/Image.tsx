@@ -14,14 +14,32 @@ const Image = ({ src, className, w, h, alt, description, priority = false }: Ima
   if (!src) return null;
 
   const isExternal = src.startsWith("http://") || src.startsWith("https://");
-  const isLocalStatic = src.startsWith("/") && (src.endsWith(".svg") || src.endsWith(".ico"));
-  const endpoint = process.env.NEXT_PUBLIC_IK_URL_ENDPOINT || "https://ik.imagekit.io/panderawan";
+  const isLocalStatic =
+    src === "/logo.png" ||
+    src === "/profile.png" ||
+    src === "/favicon.ico" ||
+    src.endsWith(".svg") ||
+    src.startsWith("/icons/");
 
-  // Build clean direct image URL
+  if (isLocalStatic) {
+    return (
+      <NextImage
+        src={src}
+        alt={alt || description || "Image"}
+        width={w ? Number(w) : 100}
+        height={h ? Number(h) : 100}
+        className={className}
+        unoptimized
+      />
+    );
+  }
+
+  // Cloudflare R2 Storage URL resolution
   let imageUrl = src;
-  if (!isExternal && !isLocalStatic) {
+  if (!isExternal) {
     const cleanPath = src.startsWith("/") ? src.slice(1) : src;
-    imageUrl = `${endpoint}/${cleanPath}`;
+    const r2Base = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://pub-dc8f3ebfad6f443b920c49b37078af5c.r2.dev";
+    imageUrl = `${r2Base}/${cleanPath}`;
   }
 
   const width = w ? Number(w) : 800;
@@ -35,7 +53,7 @@ const Image = ({ src, className, w, h, alt, description, priority = false }: Ima
       height={height}
       priority={priority}
       className={className}
-      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      unoptimized
     />
   );
 };

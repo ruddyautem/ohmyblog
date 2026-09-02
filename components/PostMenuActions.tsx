@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import { toggleSavePostAction, toggleFeaturePostAction, deletePostAction, getSavedPostsAction } from "@/app/actions";
 import { type PostWithUser } from "@/lib/db/schema";

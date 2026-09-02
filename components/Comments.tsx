@@ -3,7 +3,7 @@ import Link from "next/link";
 import Comment from "./Comment";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@clerk/nextjs";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { addCommentAction, getCommentsAction } from "@/app/actions";
 import { type CommentWithUser } from "@/lib/db/schema";
 

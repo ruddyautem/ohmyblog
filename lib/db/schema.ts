@@ -1,14 +1,14 @@
 import { relations } from 'drizzle-orm';
-import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core';
+import { pgTable, text, integer, boolean, timestamp, primaryKey } from 'drizzle-orm/pg-core';
 
-export const users = sqliteTable('users', {
+export const users = pgTable('users', {
   _id: text('_id').primaryKey(),
   clerkUserId: text('clerkUserId').notNull().unique(),
   username: text('username').notNull().unique(),
   email: text('email').notNull().unique(),
   img: text('img'),
-  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -17,7 +17,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   savedPosts: many(savedPosts),
 }));
 
-export const posts = sqliteTable('posts', {
+export const posts = pgTable('posts', {
   _id: text('_id').primaryKey(),
   userId: text('userId').references(() => users._id, { onDelete: 'cascade' }).notNull(),
   img: text('img'),
@@ -26,10 +26,10 @@ export const posts = sqliteTable('posts', {
   desc: text('desc'),
   category: text('category').default('general'),
   content: text('content').notNull(),
-  isFeatured: integer('isFeatured', { mode: 'boolean' }).default(false),
+  isFeatured: boolean('isFeatured').default(false),
   visit: integer('visit').default(0),
-  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 });
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -38,13 +38,13 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   savedBy: many(savedPosts),
 }));
 
-export const comments = sqliteTable('comments', {
+export const comments = pgTable('comments', {
   _id: text('_id').primaryKey(),
   userId: text('userId').references(() => users._id, { onDelete: 'cascade' }).notNull(),
   postId: text('postId').references(() => posts._id, { onDelete: 'cascade' }).notNull(),
   desc: text('desc').notNull(),
-  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull(),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 });
 
 export const commentsRelations = relations(comments, ({ one }) => ({
@@ -52,7 +52,7 @@ export const commentsRelations = relations(comments, ({ one }) => ({
   post: one(posts, { fields: [comments.postId], references: [posts._id] }),
 }));
 
-export const savedPosts = sqliteTable('savedPosts', {
+export const savedPosts = pgTable('savedPosts', {
   userId: text('userId').references(() => users._id, { onDelete: 'cascade' }).notNull(),
   postId: text('postId').references(() => posts._id, { onDelete: 'cascade' }).notNull(),
 }, (t) => ({
@@ -79,4 +79,5 @@ export type CommentWithUser = CommentType & {
     img: string | null;
   };
 };
+
 

@@ -1,11 +1,10 @@
 "use client";
-import { format } from "timeago.js";
-import "@/lib/timeago-fr";
+import { formatTimeAgo } from "@/lib/timeago-fr";
 import Image from "./Image";
 import NextImage from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { deleteCommentAction } from "@/app/actions";
 import { type CommentWithUser } from "@/lib/db/schema";
 
@@ -50,7 +49,7 @@ const Comment = ({ comment, postId }: { comment: CommentWithUser; postId: string
           <div>
             <span className="text-sm font-bold text-zinc-900 capitalize block">{comment.user.username}</span>
             <span className="text-[11px] text-zinc-400 font-medium">
-              {format(comment.createdAt, "fr")}
+              {formatTimeAgo(comment.createdAt)}
             </span>
           </div>
         </div>

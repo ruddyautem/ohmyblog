@@ -1,17 +1,17 @@
 import Image from "@/components/Image";
 import PostMenuActions from "@/components/PostMenuActions";
 import Comments from "@/components/Comments";
-import { format } from "timeago.js";
-import "@/lib/timeago-fr";
-import DOMPurify from "dompurify";
-import { db } from "@/lib/db";
+import { formatTimeAgo } from "@/lib/timeago-fr";
+import DOMPurify from "isomorphic-dompurify";
+import { db, client } from "@/lib/db";
+import { ensureDbInitialized } from "@/lib/db/init";
 import { posts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { JSDOM } from "jsdom";
 
 export default async function SinglePostPage(props: { params: Promise<{ slug: string }> }) {
+  await ensureDbInitialized(client);
   const params = await props.params;
   const decodedSlug = decodeURIComponent(params.slug);
   const post = await db.query.posts.findFirst({
@@ -23,10 +23,8 @@ export default async function SinglePostPage(props: { params: Promise<{ slug: st
     return notFound();
   }
 
-  // Sanitize on server using JSDOM
-  const window = new JSDOM('').window;
-  const purify = DOMPurify(window as unknown as Parameters<typeof DOMPurify>[0]);
-  const cleanContent = purify.sanitize(post.content);
+  // Fast server-side HTML sanitization with isomorphic-dompurify
+  const cleanContent = DOMPurify.sanitize(post.content);
 
   // Background visit increment (non-blocking)
   db.update(posts).set({ visit: (post.visit || 0) + 1 }).where(eq(posts._id, post._id)).execute();
@@ -45,7 +43,7 @@ export default async function SinglePostPage(props: { params: Promise<{ slug: st
               {post.category}
             </Link>
             <span className="text-zinc-400">•</span>
-            <span className="text-zinc-500">{format(post.createdAt, "fr")}</span>
+            <span className="text-zinc-500">{formatTimeAgo(post.createdAt)}</span>
             <span className="text-zinc-400">•</span>
             <span className="text-zinc-500 font-medium">{(post.visit ?? 0)} vue{(post.visit ?? 0) > 1 ? "s" : ""}</span>
           </div>

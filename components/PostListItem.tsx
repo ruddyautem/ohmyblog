@@ -2,8 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "./Image";
-import { format } from "timeago.js";
-import "@/lib/timeago-fr";
+import { formatTimeAgo } from "@/lib/timeago-fr";
 import { type PostWithUser } from "@/lib/db/schema";
 
 const PostListItem = ({ post }: { post: PostWithUser }) => {
@@ -70,7 +69,7 @@ const PostListItem = ({ post }: { post: PostWithUser }) => {
               {post.category}
             </span>
             <span>•</span>
-            <span>{format(post.createdAt, "fr")}</span>
+            <span>{formatTimeAgo(post.createdAt)}</span>
           </div>
 
           {/* Title */}

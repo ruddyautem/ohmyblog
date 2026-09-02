@@ -5,10 +5,10 @@ import StarterKit from '@tiptap/starter-kit';
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import Upload from "@/components/Upload";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createPostAction } from "@/app/actions";
 
@@ -19,11 +19,13 @@ import Link from "next/link";
 
 const MenuBar = ({
   editor,
+  folder,
   setProgress,
   handleImageUpload,
   handleVideoUpload,
 }: {
   editor: Editor | null;
+  folder?: string;
   setProgress: (p: number) => void;
   handleImageUpload: (data: { url: string; filePath: string }) => void;
   handleVideoUpload: (data: { url: string }) => void;
@@ -96,12 +98,12 @@ const MenuBar = ({
       </div>
 
       <div className="flex items-center gap-2 border-l border-zinc-200 pl-2">
-        <Upload type="image" setProgress={setProgress} setData={handleImageUpload}>
+        <Upload type="image" folder={folder} setProgress={setProgress} setData={handleImageUpload}>
           <span className="cursor-pointer inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-900 hover:text-white">
             🖼️ Image
           </span>
         </Upload>
-        <Upload type="video" setProgress={setProgress} setData={handleVideoUpload}>
+        <Upload type="video" folder={folder} setProgress={setProgress} setData={handleVideoUpload}>
           <span className="cursor-pointer inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-900 hover:text-white">
             🎥 Vidéo
           </span>
@@ -139,7 +141,7 @@ const Write = () => {
     },
   });
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<PostSchemaType>({
+  const { register, handleSubmit, formState: { errors }, reset, control } = useForm<PostSchemaType>({
     resolver: zodResolver(postSchema),
     defaultValues: {
       title: "",
@@ -147,6 +149,8 @@ const Write = () => {
       category: "general",
     },
   });
+
+  const currentTitle = useWatch({ control, name: "title" });
 
   const handleImageUpload = (data: { url: string; filePath: string }) => {
     if (!data.url) {
@@ -235,6 +239,7 @@ const Write = () => {
             <div className="flex flex-col items-center justify-center py-6 text-center">
               <Upload
                 type="image"
+                folder={currentTitle ? currentTitle.trim() : "brouillon"}
                 setProgress={setProgress}
                 setData={(data) => {
                   setCover(data);
@@ -304,6 +309,7 @@ const Write = () => {
         <div className="rounded-3xl border border-zinc-200/80 bg-white p-4 shadow-xs">
           <MenuBar
             editor={editor}
+            folder={currentTitle ? currentTitle.trim() : "brouillon"}
             setProgress={setProgress}
             handleImageUpload={handleImageUpload}
             handleVideoUpload={handleVideoUpload}

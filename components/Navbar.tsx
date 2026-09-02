@@ -109,7 +109,7 @@ const Navbar = () => {
 
           {!isSignedIn ? (
             <Link href='/sign-in'>
-              <button className='inline-flex items-center justify-center rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 transition-all hover:border-zinc-900 hover:bg-zinc-900 hover:text-white'>
+              <button className='inline-flex items-center justify-center rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 transition-all hover:border-zinc-900 hover:bg-zinc-900 hover:text-white cursor-pointer'>
                 Se connecter
               </button>
             </Link>
@@ -173,7 +173,7 @@ const Navbar = () => {
           <div className='pt-6 border-t border-zinc-100'>
             {!isSignedIn ? (
               <Link href='/sign-in' onClick={() => setOpen(false)}>
-                <button className='w-full rounded-xl bg-zinc-900 py-3 text-center text-base font-semibold text-white transition-colors hover:bg-zinc-800 shadow-sm'>
+                <button className='w-full rounded-xl bg-zinc-900 py-3 text-center text-base font-semibold text-white transition-colors hover:bg-zinc-800 shadow-sm cursor-pointer'>
                   Se connecter
                 </button>
               </Link>
