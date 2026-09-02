@@ -37,10 +37,10 @@ const FeaturedPosts = () => {
 
   return (
     <section className="mt-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         {/* Main Hero Featured Post */}
         <div className="lg:col-span-7">
-          <article className="group relative flex h-full flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all duration-300 hover:border-zinc-300 hover:shadow-md">
+          <article className="group relative flex h-full flex-col justify-between rounded-[32px] border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-xs transition-colors duration-200 hover:border-zinc-300 hover:shadow-md">
             <div>
               {posts[0].img && (
                 <Link
@@ -50,18 +50,18 @@ const FeaturedPosts = () => {
                   <Image
                     src={posts[0].img}
                     alt={posts[0].title}
-                    className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                    w="895"
+                    className="h-full w-full object-cover"
+                    w="950"
                   />
-                  <div className="absolute top-3 left-3">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-900/90 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md">
+                  <div className="absolute top-4 left-4">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-900/90 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur-md">
                       ⭐ En vedette
                     </span>
                   </div>
                 </Link>
               )}
 
-              <div className="mt-4 flex items-center gap-3 text-xs text-zinc-500">
+              <div className="mt-5 flex items-center gap-3 text-xs text-zinc-500">
                 <Link
                   href={`/posts?cat=${posts[0].category}`}
                   className="rounded-full bg-zinc-100 px-2.5 py-1 font-semibold text-zinc-800 capitalize transition-colors hover:bg-zinc-900 hover:text-white"
@@ -97,13 +97,13 @@ const FeaturedPosts = () => {
         </div>
 
         {/* Side Ranked Featured Posts with Bordered Frame */}
-        <div className="lg:col-span-5 flex flex-col justify-between gap-3 rounded-3xl border border-zinc-200/80 bg-zinc-50/60 p-4 sm:p-5 shadow-xs">
-          <div className="flex items-center justify-between border-b border-zinc-200/60 pb-2.5">
+        <div className="lg:col-span-5 flex flex-col justify-between gap-4 rounded-[32px] border border-zinc-200/80 bg-zinc-50/60 p-6 sm:p-7 shadow-xs">
+          <div className="flex items-center justify-between border-b border-zinc-200/60 pb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Sélection populaire</span>
             <span className="text-xs font-medium text-zinc-400">Top 3 de la semaine</span>
           </div>
 
-          <div className="flex flex-col gap-3 flex-1">
+          <div className="flex flex-col gap-3.5 flex-1">
             {posts.slice(1, 4).map((post, idx) => {
               const number = `0${idx + 2}`;
 

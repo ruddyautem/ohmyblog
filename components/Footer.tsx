@@ -5,7 +5,7 @@ const Footer = () => {
 
   return (
     <footer className="mt-20 border-t border-zinc-100 bg-white/60 py-10">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[1440px] 2xl:max-w-[1560px] flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-10">
         <div className="flex items-center gap-2.5">
           <Image
             src="/logo.png"

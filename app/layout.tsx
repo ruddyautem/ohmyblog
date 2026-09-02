@@ -34,7 +34,7 @@ export default function RootLayout({
         <body className="min-h-screen flex flex-col justify-between">
           <ReactQueryProvider>
             <Navbar />
-            <main className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8 py-6">
+            <main className="mx-auto w-full max-w-[1440px] 2xl:max-w-[1560px] flex-1 px-4 sm:px-6 lg:px-10 py-8">
               {children}
             </main>
             <Footer />
