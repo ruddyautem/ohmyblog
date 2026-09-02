@@ -154,26 +154,26 @@ const Homepage = () => {
             {/* Community Links Card */}
             <div className="rounded-3xl border border-zinc-200/80 bg-white p-7 shadow-xs">
               <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-400">À la une</h3>
-              <div className="space-y-2.5 text-sm">
+              <div className="space-y-3 text-sm">
                 <Link
                   href="/posts?sort=popular"
-                  className="flex items-center justify-between rounded-xl p-3 transition-colors hover:bg-zinc-50 font-medium text-zinc-800"
+                  className="flex items-center justify-between rounded-2xl border border-zinc-200/60 bg-zinc-50/70 p-3.5 transition-colors hover:bg-zinc-100/80 font-medium text-zinc-800 shadow-2xs"
                 >
                   <span className="flex items-center gap-2.5">
                     <span>📈</span>
                     <span>Les plus visités</span>
                   </span>
-                  <span className="text-xs text-zinc-400">→</span>
+                  <span className="text-xs text-zinc-400 font-semibold">→</span>
                 </Link>
                 <Link
                   href="/posts?sort=featured"
-                  className="flex items-center justify-between rounded-xl p-3 transition-colors hover:bg-zinc-50 font-medium text-zinc-800"
+                  className="flex items-center justify-between rounded-2xl border border-zinc-200/60 bg-zinc-50/70 p-3.5 transition-colors hover:bg-zinc-100/80 font-medium text-zinc-800 shadow-2xs"
                 >
                   <span className="flex items-center gap-2.5">
                     <span>⭐</span>
                     <span>Sélection éditoriale</span>
                   </span>
-                  <span className="text-xs text-zinc-400">→</span>
+                  <span className="text-xs text-zinc-400 font-semibold">→</span>
                 </Link>
               </div>
             </div>
