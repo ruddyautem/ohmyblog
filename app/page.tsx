@@ -157,7 +157,7 @@ const Homepage = () => {
                   className="flex items-center justify-between rounded-xl p-2.5 transition-colors hover:bg-zinc-50 font-medium text-zinc-800"
                 >
                   <span className="flex items-center gap-2">
-                    <span>🔥</span>
+                    <span>📈</span>
                     <span>Les plus visités</span>
                   </span>
                   <span className="text-xs text-zinc-400">→</span>
