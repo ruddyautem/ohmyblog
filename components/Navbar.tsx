@@ -128,7 +128,7 @@ const Navbar = () => {
         <div className="flex items-center gap-3 lg:hidden">
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:bg-zinc-100"
+            className="cursor-pointer flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:bg-zinc-100"
             onClick={() => setOpen((prev) => !prev)}
             aria-label="Toggle menu"
           >
@@ -180,10 +180,9 @@ const Navbar = () => {
                     setOpen(false);
                     openUserProfile();
                   }}
-                  className="flex w-full items-center justify-between rounded-xl bg-zinc-900 px-4 py-3 text-base font-semibold text-white transition-colors hover:bg-zinc-800 shadow-sm"
+                  className="flex w-full items-center justify-center rounded-xl bg-black px-4 py-3 text-base font-semibold text-white transition-colors shadow-sm text-center cursor-pointer"
                 >
                   <span>Gérer mon compte</span>
-                  <span className="text-xs text-zinc-300">⚙️</span>
                 </button>
                 <button
                   type="button"
@@ -191,7 +190,7 @@ const Navbar = () => {
                     setOpen(false);
                     signOut();
                   }}
-                  className="w-full rounded-xl border border-red-300 bg-red-50 py-3 text-center text-base font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white"
+                  className="w-full rounded-xl bg-red-500 py-3 text-center text-base font-semibold text-white transition-colors  hover:text-white cursor-pointer"
                 >
                   Se déconnecter
                 </button>

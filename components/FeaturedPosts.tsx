@@ -40,7 +40,7 @@ const FeaturedPosts = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         {/* Main Hero Featured Post */}
         <div className="lg:col-span-7">
-          <article className="group relative flex h-full flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-xs transition-colors duration-200 hover:border-zinc-300 hover:shadow-md">
+          <article className="group relative flex h-full flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-4.5 sm:p-6 lg:p-7 shadow-xs transition-colors duration-200 hover:border-zinc-300 hover:shadow-md">
             <div>
               {posts[0].img && (
                 <Link
@@ -61,7 +61,7 @@ const FeaturedPosts = () => {
                 </Link>
               )}
 
-              <div className="mt-5 flex items-center gap-3 text-xs text-zinc-500">
+              <div className="mt-4 sm:mt-5 flex items-center gap-3 text-xs text-zinc-500">
                 <Link
                   href={`/posts?cat=${posts[0].category}`}
                   className="rounded-full bg-zinc-100 px-2.5 py-1 font-semibold text-zinc-800 capitalize transition-colors hover:bg-zinc-900 hover:text-white"
@@ -97,7 +97,7 @@ const FeaturedPosts = () => {
         </div>
 
         {/* Side Ranked Featured Posts with Bordered Frame */}
-        <div className="lg:col-span-5 flex flex-col justify-between gap-4 rounded-3xl border border-zinc-200/80 bg-zinc-50/60 p-6 sm:p-7 shadow-xs">
+        <div className="lg:col-span-5 flex flex-col justify-between gap-4 rounded-3xl border border-zinc-200/80 bg-zinc-50/60 p-4.5 sm:p-6 lg:p-7 shadow-xs">
           <div className="flex items-center justify-between border-b border-zinc-200/60 pb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Sélection populaire</span>
             <span className="text-xs font-medium text-zinc-400">Top 3 de la semaine</span>
@@ -110,12 +110,12 @@ const FeaturedPosts = () => {
               return (
                 <article
                   key={post._id}
-                  className="group relative flex gap-4 rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs transition-colors duration-200 hover:border-zinc-400 hover:bg-zinc-50/50"
+                  className="group relative flex flex-col sm:flex-row gap-3.5 sm:gap-4 rounded-2xl border border-zinc-200/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors duration-200 hover:border-zinc-400 hover:bg-zinc-50/50"
                 >
                   {post?.img && (
                     <Link
                       href={`/${post.slug}`}
-                      className="relative block h-32 w-36 sm:h-32 sm:w-44 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100"
+                      className="relative block aspect-video sm:aspect-auto w-full sm:h-32 sm:w-40 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100"
                     >
                       <Image
                         src={post.img}
@@ -147,7 +147,7 @@ const FeaturedPosts = () => {
                       </h3>
 
                       {post.desc && (
-                        <p className="mt-1.5 hidden sm:line-clamp-2 text-xs text-zinc-500 leading-relaxed">
+                        <p className="mt-1.5 text-xs text-zinc-500 line-clamp-2 leading-relaxed">
                           {post.desc}
                         </p>
                       )}
