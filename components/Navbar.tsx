@@ -145,7 +145,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Drawer */}
       {open && (
-        <div className="fixed inset-x-0 top-16 z-50 flex h-[calc(100vh-4rem)] flex-col justify-between border-t border-zinc-100 bg-white/95 p-6 backdrop-blur-xl lg:hidden animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="fixed inset-x-0 top-16 z-50 flex h-[calc(100vh-4rem)] flex-col justify-between border-t border-zinc-100 bg-white p-6 lg:hidden animate-in fade-in slide-in-from-top-4 duration-200">
           <div className="flex flex-col gap-4">
             <Suspense fallback="...">
               <Search onSubmit={() => setOpen(false)} />
@@ -168,7 +168,7 @@ const Navbar = () => {
           <div className="pt-6 border-t border-zinc-100">
             {!isSignedIn ? (
               <Link href="/sign-in" onClick={() => setOpen(false)}>
-                <button className="w-full rounded-xl border border-zinc-300 py-3 text-center text-base font-medium text-zinc-900 transition-colors hover:bg-zinc-900 hover:text-white">
+                <button className="w-full rounded-xl bg-zinc-900 py-3 text-center text-base font-semibold text-white transition-colors hover:bg-zinc-800 shadow-sm">
                   Se connecter
                 </button>
               </Link>
@@ -180,10 +180,10 @@ const Navbar = () => {
                     setOpen(false);
                     openUserProfile();
                   }}
-                  className="flex w-full items-center justify-between rounded-xl bg-zinc-100 px-4 py-3 text-base font-medium text-zinc-900 transition-colors hover:bg-zinc-200"
+                  className="flex w-full items-center justify-between rounded-xl bg-zinc-900 px-4 py-3 text-base font-semibold text-white transition-colors hover:bg-zinc-800 shadow-sm"
                 >
                   <span>Gérer mon compte</span>
-                  <span className="text-xs text-zinc-500">⚙️</span>
+                  <span className="text-xs text-zinc-300">⚙️</span>
                 </button>
                 <button
                   type="button"
@@ -191,7 +191,7 @@ const Navbar = () => {
                     setOpen(false);
                     signOut();
                   }}
-                  className="w-full rounded-xl border border-red-200 bg-red-50/50 py-3 text-center text-base font-medium text-red-600 transition-colors hover:bg-red-500 hover:text-white"
+                  className="w-full rounded-xl border border-red-300 bg-red-50 py-3 text-center text-base font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white"
                 >
                   Se déconnecter
                 </button>
