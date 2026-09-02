@@ -68,7 +68,7 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-100 bg-white/80 backdrop-blur-md transition-all">
-      <div className="mx-auto flex h-16 md:h-18 max-w-[1440px] 2xl:max-w-[1560px] items-center justify-between px-4 sm:px-6 lg:px-10">
+      <div className="mx-auto flex h-16 md:h-20 max-w-7xl 2xl:max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link
           href="/"
@@ -162,13 +162,6 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/write"
-                onClick={() => setOpen(false)}
-                className="rounded-xl bg-zinc-900 px-4 py-3 text-center text-base font-medium text-white shadow-sm transition-colors hover:bg-zinc-800"
-              >
-                ✍️ Écrire un post
-              </Link>
             </nav>
           </div>
 

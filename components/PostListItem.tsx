@@ -12,12 +12,12 @@ const PostListItem = ({ post }: { post: PostWithUser }) => {
       {post.img && (
         <Link
           href={`/${post.slug}`}
-          className="relative aspect-[16/10] w-full flex-shrink-0 overflow-hidden rounded-2xl bg-zinc-100 md:w-5/12"
+          className="relative aspect-video w-full flex-shrink-0 overflow-hidden rounded-2xl bg-zinc-100 md:w-5/12"
         >
           <Image
             src={post.img}
             alt={post.title}
-            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            className="h-full w-full object-cover"
             w="735"
           />
         </Link>

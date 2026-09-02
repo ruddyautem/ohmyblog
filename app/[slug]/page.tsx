@@ -51,7 +51,7 @@ export default async function SinglePostPage(props: { params: Promise<{ slug: st
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl md:text-4xl lg:text-5xl leading-[1.18]">
+          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl md:text-4xl lg:text-5xl leading-tight">
             {post.title}
           </h1>
 
@@ -87,7 +87,7 @@ export default async function SinglePostPage(props: { params: Promise<{ slug: st
         {/* Compact & Controlled Cover Image */}
         {post.img && (
           <div className="w-full md:w-5/12 lg:w-4/12 flex-shrink-0">
-            <div className="relative aspect-[4/3] max-h-72 w-full overflow-hidden rounded-3xl border border-zinc-200/80 bg-zinc-100 shadow-sm">
+            <div className="relative aspect-video max-h-72 w-full overflow-hidden rounded-3xl border border-zinc-200/80 bg-zinc-100 shadow-sm">
               <Image
                 src={post.img}
                 alt={post.title}

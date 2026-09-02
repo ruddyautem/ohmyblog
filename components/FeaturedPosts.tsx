@@ -40,12 +40,12 @@ const FeaturedPosts = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         {/* Main Hero Featured Post */}
         <div className="lg:col-span-7">
-          <article className="group relative flex h-full flex-col justify-between rounded-[32px] border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-xs transition-colors duration-200 hover:border-zinc-300 hover:shadow-md">
+          <article className="group relative flex h-full flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-xs transition-colors duration-200 hover:border-zinc-300 hover:shadow-md">
             <div>
               {posts[0].img && (
                 <Link
                   href={`/${posts[0].slug}`}
-                  className="relative block aspect-[16/10] w-full overflow-hidden rounded-2xl bg-zinc-100"
+                  className="relative block aspect-video w-full overflow-hidden rounded-2xl bg-zinc-100"
                 >
                   <Image
                     src={posts[0].img}
@@ -97,7 +97,7 @@ const FeaturedPosts = () => {
         </div>
 
         {/* Side Ranked Featured Posts with Bordered Frame */}
-        <div className="lg:col-span-5 flex flex-col justify-between gap-4 rounded-[32px] border border-zinc-200/80 bg-zinc-50/60 p-6 sm:p-7 shadow-xs">
+        <div className="lg:col-span-5 flex flex-col justify-between gap-4 rounded-3xl border border-zinc-200/80 bg-zinc-50/60 p-6 sm:p-7 shadow-xs">
           <div className="flex items-center justify-between border-b border-zinc-200/60 pb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Sélection populaire</span>
             <span className="text-xs font-medium text-zinc-400">Top 3 de la semaine</span>
@@ -115,7 +115,7 @@ const FeaturedPosts = () => {
                   {post?.img && (
                     <Link
                       href={`/${post.slug}`}
-                      className="relative block h-32 w-38 sm:h-34 sm:w-44 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100"
+                      className="relative block h-32 w-36 sm:h-32 sm:w-44 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100"
                     >
                       <Image
                         src={post.img}
@@ -134,12 +134,12 @@ const FeaturedPosts = () => {
                         </span>
                         <Link
                           href={`/posts?cat=${post.category}`}
-                          className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-800 capitalize transition-colors hover:bg-zinc-900 hover:text-white"
+                          className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold text-zinc-800 capitalize transition-colors hover:bg-zinc-900 hover:text-white"
                         >
                           {post.category}
                         </Link>
                         <span className="text-zinc-400">•</span>
-                        <span className="text-zinc-400 text-[11px]">{format(post.createdAt, "fr")}</span>
+                        <span className="text-zinc-400 text-xs">{format(post.createdAt, "fr")}</span>
                       </div>
 
                       <h3 className="mt-2 text-sm sm:text-base font-bold text-zinc-900 transition-colors line-clamp-2 leading-snug group-hover:text-zinc-600">
@@ -162,7 +162,7 @@ const FeaturedPosts = () => {
                         <span>→</span>
                       </Link>
 
-                      <span className="text-[11px] font-medium text-zinc-400">
+                      <span className="text-xs font-medium text-zinc-400">
                         {(post.visit ?? 0)} vue{(post.visit ?? 0) > 1 ? "s" : ""}
                       </span>
                     </div>

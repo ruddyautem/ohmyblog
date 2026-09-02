@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Suspense } from "react";
 import MainCategories from "@/components/MainCategories";
 import FeaturedPosts from "@/components/FeaturedPosts";
@@ -8,14 +9,14 @@ const Homepage = () => {
   return (
     <div className="space-y-12 sm:space-y-16">
       {/* Hero Header Card */}
-      <section className="relative overflow-hidden rounded-[32px] border border-zinc-200/80 bg-zinc-50/50 p-8 sm:p-12 lg:p-14 shadow-xs">
+      <section className="relative overflow-hidden rounded-3xl border border-zinc-200/80 bg-zinc-50/50 p-8 sm:p-12 lg:p-14 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-10">
           <div className="max-w-3xl space-y-5">
             <div className="inline-flex items-center rounded-full border border-zinc-200/80 bg-white px-3.5 py-1 text-xs font-medium text-zinc-600 shadow-2xs">
               <span>Articles & Récits</span>
             </div>
 
-            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.08]">
+            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl xl:text-7xl leading-tight">
               Partagez un peu de vous avec les autres.
             </h1>
 
@@ -39,40 +40,43 @@ const Homepage = () => {
             </div>
           </div>
 
-          {/* Modern Interactive Draft Preview Card */}
+          {/* OhMyBlog Brand Creator Box */}
           <div className="hidden lg:block w-80 flex-shrink-0 self-center">
             <Link
               href="/write"
-              className="group relative block rounded-3xl border border-zinc-200/90 bg-white p-6 shadow-xs transition-colors duration-200 hover:border-zinc-400 hover:bg-zinc-50/50"
+              className="group relative block rounded-3xl border border-zinc-200/90 bg-white p-6 shadow-xs transition-all duration-200 hover:border-zinc-900 hover:shadow-md"
             >
-              {/* Window dots & Status tag */}
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-3.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-400/80"></span>
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80"></span>
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80"></span>
+              {/* Brand Header */}
+              <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
+                <div className="relative overflow-hidden rounded-xl shadow-2xs ring-1 ring-zinc-900/10">
+                  <Image
+                    src="/logo.png"
+                    alt="OhMyBlog Logo"
+                    width={36}
+                    height={36}
+                    className="h-9 w-9 object-contain"
+                  />
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-semibold text-zinc-600">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                  Prêt à publier
-                </span>
+                <div>
+                  <span className="text-sm font-bold text-zinc-900 block">OhMyBlog!</span>
+                  <span className="text-xs text-zinc-500">Espace contributeur</span>
+                </div>
               </div>
 
-              {/* Story Prompt Preview */}
-              <div className="py-5 space-y-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-base">✨</span>
-                  <span className="text-sm font-bold text-zinc-900">Une histoire à raconter ?</span>
-                </div>
-                <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed italic">
-                  &ldquo;Chaque expérience mérite d&apos;être partagée avec la communauté...&rdquo;
+              {/* Story Prompt */}
+              <div className="py-5 space-y-2">
+                <h3 className="text-sm font-bold text-zinc-900 leading-snug">
+                  Votre récit a sa place ici.
+                </h3>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Rejoignez les auteurs d&apos;OhMyBlog et partagez vos passions avec la communauté.
                 </p>
               </div>
 
               {/* Action Button inside card */}
               <div className="flex items-center justify-between rounded-xl bg-zinc-900 px-4 py-3 text-xs font-semibold text-white shadow-xs transition-colors group-hover:bg-zinc-800">
-                <span>Rédiger mon article</span>
-                <span>→</span>
+                <span>Rédiger un article</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
               </div>
             </Link>
           </div>
