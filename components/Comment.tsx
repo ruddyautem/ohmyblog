@@ -58,7 +58,7 @@ const Comment = ({ comment, postId }: { comment: CommentWithUser; postId: string
         {user && (comment.user.username === user.username || role === "admin") && (
           <button
             type="button"
-            className="text-xs font-semibold text-zinc-400 hover:text-red-500 transition-colors p-1"
+            className="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors p-1"
             onClick={() => deleteCommentMutation.mutate()}
             disabled={deleteCommentMutation.isPending}
           >

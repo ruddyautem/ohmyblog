@@ -35,16 +35,6 @@ const MainCategories = () => {
           );
         })}
       </div>
-
-      {/* Quick Write CTA on Desktop */}
-      <div className="hidden sm:flex flex-shrink-0">
-        <Link
-          href="/write"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-xs sm:text-sm font-medium text-white shadow-xs transition-all hover:bg-zinc-800 hover:shadow-sm"
-        >
-          <span>✍️ Écrire</span>
-        </Link>
-      </div>
     </div>
   );
 };

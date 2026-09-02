@@ -11,9 +11,8 @@ const Homepage = () => {
       <section className="relative overflow-hidden rounded-[32px] border border-zinc-200/80 bg-zinc-50/50 p-8 sm:p-12 lg:p-14 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-10">
           <div className="max-w-3xl space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white px-4 py-1.5 text-xs font-semibold text-zinc-700 shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Plateforme d&apos;écriture & de partage</span>
+            <div className="inline-flex items-center rounded-full border border-zinc-200/80 bg-white px-3.5 py-1 text-xs font-medium text-zinc-600 shadow-2xs">
+              <span>Articles & Récits</span>
             </div>
 
             <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.08]">
