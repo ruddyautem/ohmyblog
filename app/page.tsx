@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import MainCategories from "@/components/MainCategories";
 import FeaturedPosts from "@/components/FeaturedPosts";
 import PostList from "@/components/PostList";
-import Image from "next/image";
 
 const Homepage = () => {
   return (
@@ -41,40 +40,43 @@ const Homepage = () => {
             </div>
           </div>
 
-          {/* Rotating Write CTA */}
-          <Link href="/write" className="group relative hidden lg:flex flex-shrink-0 self-center">
-            <svg
-              viewBox="0 0 200 200"
-              width="170"
-              height="170"
-              className="animatedButton animate-spin text-xs font-semibold uppercase tracking-widest text-zinc-700 transition-transform group-hover:scale-105"
+          {/* Modern Interactive Draft Preview Card */}
+          <div className="hidden lg:block w-72 flex-shrink-0 self-center">
+            <Link
+              href="/write"
+              className="group relative block rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-xs transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-zinc-400 hover:shadow-lg"
             >
-              <path
-                id="circlePath"
-                fill="none"
-                d="M 100, 100 m -75, 0 a 75,75 0 1,1 150,0 a 75,75 0 1, 1 -150,0"
-              />
-              <text fill="currentColor">
-                <textPath href="#circlePath" startOffset="0%">
-                  Vos Histoires •
-                </textPath>
-                <textPath href="#circlePath" startOffset="50%">
-                  Vos Aventures •
-                </textPath>
-              </text>
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex h-18 w-18 items-center justify-center rounded-full bg-zinc-900 shadow-lg ring-4 ring-zinc-100 transition-transform duration-300 group-hover:scale-110 group-hover:bg-zinc-800">
-                <Image
-                  src="/writeblog.svg"
-                  alt="Écrire un post"
-                  width={40}
-                  height={40}
-                  className="h-8 w-8 brightness-0 invert"
-                />
+              {/* Window dots & Status tag */}
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-400/80"></span>
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80"></span>
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80"></span>
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold text-zinc-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  Prêt à publier
+                </span>
               </div>
-            </div>
-          </Link>
+
+              {/* Story Prompt Preview */}
+              <div className="py-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">✨</span>
+                  <span className="text-xs font-bold text-zinc-900">Une histoire à raconter ?</span>
+                </div>
+                <p className="text-xs text-zinc-500 leading-relaxed italic">
+                  &ldquo;Chaque expérience mérite d&apos;être partagée avec la communauté...&rdquo;
+                </p>
+              </div>
+
+              {/* Action Button inside card */}
+              <div className="flex items-center justify-between rounded-xl bg-zinc-900 px-3.5 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors group-hover:bg-zinc-800">
+                <span>Rédiger mon article</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 
