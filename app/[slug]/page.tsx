@@ -135,10 +135,10 @@ export default async function SinglePostPage(props: { params: Promise<{ slug: st
 
             <div className="mt-4 flex gap-2">
               <Link href="#" className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 transition-colors">
-                <Image src="facebook.svg" alt="Facebook" w={16} h={16} />
+                <Image src="/facebook.svg" alt="Facebook" w={16} h={16} />
               </Link>
               <Link href="#" className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 transition-colors">
-                <Image src="instagram.svg" alt="Instagram" w={16} h={16} />
+                <Image src="/instagram.svg" alt="Instagram" w={16} h={16} />
               </Link>
             </div>
           </div>

@@ -14,11 +14,15 @@ const Image = ({ src, className, w, h, alt, description, priority = false }: Ima
   if (!src) return null;
 
   const isExternal = src.startsWith("http://") || src.startsWith("https://");
+  const isLocalStatic = src.startsWith("/") && (src.endsWith(".svg") || src.endsWith(".ico"));
   const endpoint = process.env.NEXT_PUBLIC_IK_URL_ENDPOINT || "https://ik.imagekit.io/panderawan";
 
   // Build clean direct image URL
-  const cleanPath = src.startsWith("/") ? src.slice(1) : src;
-  const imageUrl = isExternal ? src : `${endpoint}/${cleanPath}`;
+  let imageUrl = src;
+  if (!isExternal && !isLocalStatic) {
+    const cleanPath = src.startsWith("/") ? src.slice(1) : src;
+    imageUrl = `${endpoint}/${cleanPath}`;
+  }
 
   const width = w ? Number(w) : 800;
   const height = h ? Number(h) : 600;
