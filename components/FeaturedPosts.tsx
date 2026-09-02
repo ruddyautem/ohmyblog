@@ -96,37 +96,37 @@ const FeaturedPosts = () => {
           </article>
         </div>
 
-        {/* Side Ranked Featured Posts with Bordered Frame & Interactive Hover */}
-        <div className="lg:col-span-5 flex flex-col justify-between gap-4 rounded-3xl border border-zinc-200/80 bg-zinc-50/60 p-5 sm:p-6 shadow-xs">
-          <div className="flex items-center justify-between border-b border-zinc-200/60 pb-3">
+        {/* Side Ranked Featured Posts with Bordered Frame */}
+        <div className="lg:col-span-5 flex flex-col justify-between gap-3 rounded-3xl border border-zinc-200/80 bg-zinc-50/60 p-4 sm:p-5 shadow-xs">
+          <div className="flex items-center justify-between border-b border-zinc-200/60 pb-2.5">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Sélection populaire</span>
             <span className="text-xs font-medium text-zinc-400">Top 3 de la semaine</span>
           </div>
 
-          <div className="flex flex-col justify-between gap-4 flex-1">
+          <div className="flex flex-col gap-3 flex-1">
             {posts.slice(1, 4).map((post, idx) => {
               const number = `0${idx + 2}`;
 
               return (
                 <article
                   key={post._id}
-                  className="group relative flex gap-4 sm:gap-5 rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs transition-all duration-300 ease-out hover:-translate-y-1 hover:border-zinc-400 hover:shadow-md"
+                  className="group relative flex gap-4 rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-2xs transition-colors duration-200 hover:border-zinc-400 hover:bg-zinc-50/50"
                 >
                   {post?.img && (
                     <Link
                       href={`/${post.slug}`}
-                      className="relative block h-26 w-32 sm:h-28 sm:w-36 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100"
+                      className="relative block h-32 w-38 sm:h-34 sm:w-44 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100"
                     >
                       <Image
                         src={post.img}
                         alt={post.title}
-                        className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-                        w="350"
+                        className="h-full w-full object-cover"
+                        w="450"
                       />
                     </Link>
                   )}
 
-                  <div className="flex flex-1 flex-col justify-between py-1 min-w-0">
+                  <div className="flex flex-1 flex-col justify-between py-0.5 min-w-0">
                     <div>
                       <div className="flex items-center gap-2 text-xs">
                         <span className="font-mono text-xs font-bold text-zinc-400 transition-colors group-hover:text-zinc-900">
@@ -145,15 +145,21 @@ const FeaturedPosts = () => {
                       <h3 className="mt-2 text-sm sm:text-base font-bold text-zinc-900 transition-colors line-clamp-2 leading-snug group-hover:text-zinc-600">
                         <Link href={`/${post.slug}`}>{post.title}</Link>
                       </h3>
+
+                      {post.desc && (
+                        <p className="mt-1.5 hidden sm:line-clamp-2 text-xs text-zinc-500 leading-relaxed">
+                          {post.desc}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between">
+                    <div className="mt-3 flex items-center justify-between border-t border-zinc-100/80 pt-2">
                       <Link
                         href={`/${post.slug}`}
                         className="text-xs font-semibold text-zinc-800 hover:text-zinc-500 transition-colors inline-flex items-center gap-1"
                       >
-                        <span>Lire</span>
-                        <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
+                        <span>Lire l&apos;article</span>
+                        <span>→</span>
                       </Link>
 
                       <span className="text-[11px] font-medium text-zinc-400">
