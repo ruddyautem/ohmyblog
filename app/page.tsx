@@ -114,7 +114,7 @@ const Homepage = () => {
           </div>
 
           {/* Right Sidebar with Bordered Cards */}
-          <aside className="w-full lg:w-4/12 space-y-6 sticky top-24">
+          <aside className="w-full lg:w-4/12 space-y-6">
             {/* Write Callout Card */}
             <div className="rounded-3xl border border-zinc-200/80 bg-zinc-900 p-7 text-white shadow-xs">
               <div className="text-2xl mb-2">💡</div>
