@@ -98,10 +98,11 @@ export async function toggleSavePostAction(postId: string) {
 
   if (existing) {
     await db.delete(savedPosts).where(and(eq(savedPosts.userId, user._id), eq(savedPosts.postId, postId)));
+    return false;
   } else {
     await db.insert(savedPosts).values({ userId: user._id, postId });
+    return true;
   }
-  return true;
 }
 
 export async function toggleFeaturePostAction(postId: string) {
