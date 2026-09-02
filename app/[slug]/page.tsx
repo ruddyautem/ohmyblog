@@ -32,68 +32,72 @@ export default async function SinglePostPage(props: { params: Promise<{ slug: st
   db.update(posts).set({ visit: (post.visit || 0) + 1 }).where(eq(posts._id, post._id)).execute();
 
   return (
-    <article className="mt-4 space-y-10">
-      {/* Article Header */}
-      <header className="space-y-6 max-w-4xl">
-        {/* Category & Date Badge */}
-        <div className="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm">
-          <Link
-            href={`/posts?cat=${post.category}`}
-            className="rounded-full bg-zinc-900 px-3 py-1 font-semibold text-white capitalize shadow-xs transition-colors hover:bg-zinc-800"
-          >
-            {post.category}
-          </Link>
-          <span className="text-zinc-400">•</span>
-          <span className="text-zinc-500">{format(post.createdAt, "fr")}</span>
-          <span className="text-zinc-400">•</span>
-          <span className="text-zinc-500 font-medium">{(post.visit ?? 0)} vue{(post.visit ?? 0) > 1 ? "s" : ""}</span>
-        </div>
+    <article className="mt-4 space-y-8">
+      {/* Article Header with Balanced Side Cover Image */}
+      <header className="flex flex-col-reverse md:flex-row items-center justify-between gap-8 pb-6 border-b border-zinc-100">
+        <div className="flex flex-col gap-4 flex-1">
+          {/* Category & Date Badge */}
+          <div className="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm">
+            <Link
+              href={`/posts?cat=${post.category}`}
+              className="rounded-full bg-zinc-900 px-3 py-1 font-semibold text-white capitalize shadow-xs transition-colors hover:bg-zinc-800"
+            >
+              {post.category}
+            </Link>
+            <span className="text-zinc-400">•</span>
+            <span className="text-zinc-500">{format(post.createdAt, "fr")}</span>
+            <span className="text-zinc-400">•</span>
+            <span className="text-zinc-500 font-medium">{(post.visit ?? 0)} vue{(post.visit ?? 0) > 1 ? "s" : ""}</span>
+          </div>
 
-        {/* Title */}
-        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl md:text-5xl lg:text-6xl leading-[1.15]">
-          {post.title}
-        </h1>
+          {/* Title */}
+          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl md:text-4xl lg:text-5xl leading-[1.18]">
+            {post.title}
+          </h1>
 
-        {/* Short Description */}
-        {post.desc && (
-          <p className="text-lg sm:text-xl leading-relaxed text-zinc-600 font-normal">
-            {post.desc}
-          </p>
-        )}
-
-        {/* Author Bio Bar */}
-        <div className="flex items-center gap-3 pt-2 border-t border-zinc-100">
-          {post.user?.img && (
-            <Image
-              src={post.user.img}
-              alt={post.user.username}
-              className="h-10 w-10 rounded-full object-cover ring-2 ring-zinc-200"
-              w="40"
-              h="40"
-            />
+          {/* Short Description */}
+          {post.desc && (
+            <p className="text-base sm:text-lg leading-relaxed text-zinc-600 font-normal">
+              {post.desc}
+            </p>
           )}
-          <div>
-            <div className="text-sm font-bold text-zinc-900 capitalize">
-              <Link href={`/posts?author=${post.user?.username}`} className="hover:underline">
-                {post.user?.username}
-              </Link>
+
+          {/* Author Bio Bar */}
+          <div className="flex items-center gap-3 pt-2">
+            {post.user?.img && (
+              <Image
+                src={post.user.img}
+                alt={post.user.username}
+                className="h-10 w-10 rounded-full object-cover ring-2 ring-zinc-200"
+                w="40"
+                h="40"
+              />
+            )}
+            <div>
+              <div className="text-sm font-bold text-zinc-900 capitalize">
+                <Link href={`/posts?author=${post.user?.username}`} className="hover:underline">
+                  {post.user?.username}
+                </Link>
+              </div>
+              <p className="text-xs text-zinc-400">Auteur & Contributeur</p>
             </div>
-            <p className="text-xs text-zinc-400">Auteur & Contributeur</p>
           </div>
         </div>
-      </header>
 
-      {/* Main Cover Image */}
-      {post.img && (
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl border border-zinc-200/80 bg-zinc-100 shadow-sm">
-          <Image
-            src={post.img}
-            alt={post.title}
-            className="h-full w-full object-cover"
-            w="1200"
-          />
-        </div>
-      )}
+        {/* Compact & Controlled Cover Image */}
+        {post.img && (
+          <div className="w-full md:w-5/12 lg:w-4/12 flex-shrink-0">
+            <div className="relative aspect-[4/3] max-h-72 w-full overflow-hidden rounded-3xl border border-zinc-200/80 bg-zinc-100 shadow-sm">
+              <Image
+                src={post.img}
+                alt={post.title}
+                className="h-full w-full object-cover"
+                w="600"
+              />
+            </div>
+          </div>
+        )}
+      </header>
 
       {/* Content & Sidebar Grid */}
       <div className="flex flex-col gap-12 lg:flex-row lg:items-start">
