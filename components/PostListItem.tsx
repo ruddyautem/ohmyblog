@@ -7,27 +7,31 @@ import { type PostWithUser } from "@/lib/db/schema";
 
 const PostListItem = ({ post }: { post: PostWithUser }) => {
   return (
-    <article className="group mb-6 flex flex-col gap-6 rounded-3xl border border-zinc-200/80 bg-white p-5 sm:p-6 shadow-xs transition-all duration-300 hover:border-zinc-300 hover:shadow-md md:flex-row">
+    <article className="group relative mb-6 flex flex-col gap-6 rounded-3xl border border-zinc-200/80 bg-white p-5 sm:p-6 shadow-xs transition-colors duration-200 hover:border-zinc-300 hover:shadow-md md:flex-row cursor-pointer">
+      {/* Master Stretched Link */}
+      <Link
+        href={`/${post.slug}`}
+        className="absolute inset-0 z-0 rounded-3xl"
+        aria-label={post.title}
+      />
+
       {/* Article Cover Image */}
       {post.img && (
-        <Link
-          href={`/${post.slug}`}
-          className="relative aspect-video w-full flex-shrink-0 overflow-hidden rounded-2xl bg-zinc-100 md:w-5/12"
-        >
+        <div className="relative z-10 aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-zinc-100 md:w-5/12">
           <Image
             src={post.img}
             alt={post.title}
             className="h-full w-full object-cover"
             w="735"
           />
-        </Link>
+        </div>
       )}
 
       {/* Article Details */}
-      <div className="flex flex-1 flex-col justify-between py-1">
+      <div className="relative z-10 flex flex-1 flex-col justify-between py-1">
         <div>
           {/* Metadata Row */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500 relative z-20">
             {post.user && (
               <div className="flex items-center gap-2">
                 {post.user.img && (
@@ -60,7 +64,7 @@ const PostListItem = ({ post }: { post: PostWithUser }) => {
 
           {/* Title */}
           <h2 className="mt-3 text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 transition-colors group-hover:text-zinc-700">
-            <Link href={`/${post.slug}`}>{post.title}</Link>
+            {post.title}
           </h2>
 
           {/* Description */}
@@ -73,16 +77,12 @@ const PostListItem = ({ post }: { post: PostWithUser }) => {
 
         {/* Footer info & Read Link */}
         <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-4">
-          <Link
-            href={`/${post.slug}`}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-900 transition-colors hover:text-zinc-600"
-          >
-            <span>Lire l&apos;article</span>
-            <span>→</span>
-          </Link>
-
           <span className="text-xs text-zinc-400 font-medium">
             {(post.visit ?? 0)} vue{(post.visit ?? 0) > 1 ? "s" : ""}
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-900 group-hover:text-zinc-600 transition-colors">
+            <span>Lire l&apos;article</span>
+            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
           </span>
         </div>
       </div>
