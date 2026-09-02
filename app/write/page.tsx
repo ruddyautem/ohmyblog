@@ -15,59 +15,98 @@ import { createPostAction } from "@/app/actions";
 import Underline from '@tiptap/extension-underline';
 import TiptapImage from '@tiptap/extension-image';
 import NextImage from "next/image";
+import Link from "next/link";
 
-const MenuBar = ({ editor }: { editor: Editor | null }) => {
+const MenuBar = ({
+  editor,
+  setProgress,
+  handleImageUpload,
+  handleVideoUpload,
+}: {
+  editor: Editor | null;
+  setProgress: (p: number) => void;
+  handleImageUpload: (data: { url: string; filePath: string }) => void;
+  handleVideoUpload: (data: { url: string }) => void;
+}) => {
   if (!editor) {
     return null;
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-2 p-2 bg-gray-100 rounded border border-gray-300">
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        disabled={!editor.can().chain().focus().toggleBold().run()}
-        className={`px-3 py-1 rounded font-bold ${editor.isActive('bold') ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-      >
-        B
-      </button>
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        disabled={!editor.can().chain().focus().toggleItalic().run()}
-        className={`px-3 py-1 rounded italic ${editor.isActive('italic') ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-      >
-        I
-      </button>
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-        disabled={!editor.can().chain().focus().toggleUnderline().run()}
-        className={`px-3 py-1 rounded underline ${editor.isActive('underline') ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-      >
-        U
-      </button>
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        className={`px-3 py-1 rounded font-bold ${editor.isActive('heading', { level: 1 }) ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-      >
-        H1
-      </button>
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={`px-3 py-1 rounded font-bold ${editor.isActive('heading', { level: 2 }) ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-      >
-        H2
-      </button>
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={`px-3 py-1 rounded ${editor.isActive('bulletList') ? 'bg-black text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-      >
-        • List
-      </button>
+    <div className="sticky top-20 z-40 mb-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-zinc-200/80 bg-white/95 p-2 shadow-sm backdrop-blur-md">
+      <div className="flex flex-wrap items-center gap-1">
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+            editor.isActive('bold') ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-zinc-100'
+          }`}
+          title="Gras"
+        >
+          B
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm italic transition-colors ${
+            editor.isActive('italic') ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-zinc-100'
+          }`}
+          title="Italique"
+        >
+          I
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm underline transition-colors ${
+            editor.isActive('underline') ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-zinc-100'
+          }`}
+          title="Souligné"
+        >
+          U
+        </button>
+        <div className="mx-1 h-5 w-px bg-zinc-200"></div>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${
+            editor.isActive('heading', { level: 1 }) ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-zinc-100'
+          }`}
+        >
+          H1
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${
+            editor.isActive('heading', { level: 2 }) ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-zinc-100'
+          }`}
+        >
+          H2
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+            editor.isActive('bulletList') ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-zinc-100'
+          }`}
+        >
+          • Liste
+        </button>
+      </div>
+
+      <div className="flex items-center gap-2 border-l border-zinc-200 pl-2">
+        <Upload type="image" setProgress={setProgress} setData={handleImageUpload}>
+          <span className="cursor-pointer inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-900 hover:text-white">
+            🖼️ Image
+          </span>
+        </Upload>
+        <Upload type="video" setProgress={setProgress} setData={handleVideoUpload}>
+          <span className="cursor-pointer inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-900 hover:text-white">
+            🎥 Vidéo
+          </span>
+        </Upload>
+      </div>
     </div>
   );
 };
@@ -92,10 +131,10 @@ const Write = () => {
       Underline,
       TiptapImage.configure({ inline: true, allowBase64: true }),
     ],
-    content: '<p>Commencez à écrire ici...</p>',
+    content: '<p>Rédigez votre récit ici...</p>',
     editorProps: {
       attributes: {
-        class: 'focus:outline-none min-h-[400px] p-4 bg-gray-50 border border-gray-300 rounded text-black [&_img]:max-w-full [&_img]:my-2 [&_img]:rounded [&_h1]:text-3xl [&_h1]:font-bold [&_h2]:text-2xl [&_h2]:font-bold [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_ul]:list-disc [&_ul]:ml-4',
+        class: 'focus:outline-none min-h-[450px] p-6 text-zinc-800 leading-relaxed text-base sm:text-lg [&_img]:max-w-full [&_img]:my-6 [&_img]:rounded-2xl [&_img]:shadow-sm [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-3 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_ul]:list-disc [&_ul]:ml-6 [&_p]:mb-4',
       },
     },
   });
@@ -110,19 +149,17 @@ const Write = () => {
   });
 
   const handleImageUpload = (data: { url: string; filePath: string }) => {
-    console.log('Image upload response:', data);
     if (!data.url) {
       toast.error("URL de l'image manquante");
       return;
     }
     editor?.chain().focus().setImage({ src: data.url }).run();
-    toast.success("Image ajoutée !");
+    toast.success("Image insérée !");
   };
 
   const handleVideoUpload = (data: { url: string }) => {
-    console.log('Video upload response:', data);
-    editor?.chain().focus().insertContent(`<p><iframe src="${data.url}" frameborder="0" allowfullscreen></iframe></p>`).run();
-    toast.success("Vidéo ajoutée !");
+    editor?.chain().focus().insertContent(`<p><iframe src="${data.url}" frameborder="0" allowfullscreen class="w-full aspect-video rounded-2xl my-4"></iframe></p>`).run();
+    toast.success("Vidéo insérée !");
   };
 
   const mutation = useMutation({
@@ -130,19 +167,29 @@ const Write = () => {
       return await createPostAction(newPost);
     },
     onSuccess: (res) => {
-      toast.success("Post créé avec succès !");
+      toast.success("Article publié avec succès !");
       reset();
       editor?.commands.setContent('');
       setCover(null);
       if (res?.slug) router.push(`/${res.slug}`);
     },
     onError: () => {
-      toast.error("Erreur lors de la création");
+      toast.error("Erreur lors de la publication");
     }
   });
 
-  if (!isLoaded) return <div className="text-center">Chargement...</div>;
-  if (isLoaded && !isSignedIn) return <div className="">Vous devez vous authentifier!</div>;
+  if (!isLoaded) return <div className="py-20 text-center text-zinc-400">Chargement...</div>;
+  if (isLoaded && !isSignedIn) {
+    return (
+      <div className="py-20 text-center space-y-4">
+        <h2 className="text-2xl font-bold text-zinc-900">Connexion requise</h2>
+        <p className="text-zinc-600">Vous devez être connecté pour rédiger et publier un article.</p>
+        <Link href="/sign-in" className="inline-block rounded-full bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white">
+          Se connecter
+        </Link>
+      </div>
+    );
+  }
 
   const onSubmit = async (data: PostSchemaType) => {
     const postData = {
@@ -154,87 +201,122 @@ const Write = () => {
   };
 
   return (
-    <div className="flex h-max flex-col gap-6 py-8">
-      <h1 className="text-xl font-light">Créer un nouveau post</h1>
-      <form className="mb-6 flex flex-1 flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex items-center gap-4">
-          <Upload
-            type="image"
-            setProgress={setProgress}
-            setData={(data) => {
-              setCover(data);
-              toast.success("Photo de couverture ajoutée!");
-            }}
-          >
+    <div className="mx-auto max-w-4xl py-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* Top Actions Bar */}
+        <div className="flex items-center justify-between border-b border-zinc-100 pb-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Nouvel article</h1>
+            <p className="text-xs text-zinc-500 mt-0.5">Rédigez et partagez votre histoire</p>
+          </div>
+
+          <div className="flex items-center gap-3">
             <button
-              type="button"
-              className="w-36 cursor-pointer rounded bg-black p-2 text-white"
+              type="submit"
+              disabled={mutation.isPending || (0 < progress && progress < 100)}
+              className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 disabled:opacity-50"
             >
-              Ajouter image de couverture
+              {mutation.isPending ? "Publication..." : "Publier l'article"}
             </button>
-          </Upload>
-          {cover?.url && (
-            <NextImage
-              src={cover.url}
-              alt="Cover Preview"
-              width={96}
-              height={64}
-              className="h-16 w-24 rounded object-cover shadow"
-            />
-          )}
-        </div>
-
-        <div>
-          <input
-            type="text"
-            placeholder="Titre de mon histoire"
-            className="w-full rounded bg-gray-200 p-2 text-4xl font-semibold text-black focus:outline-2"
-            {...register("title")}
-          />
-          {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message as string}</p>}
-        </div>
-
-        <div className="flex items-center gap-4">
-          <label className="text-sm">Choisissez une catégorie:</label>
-          <select {...register("category")} className="rounded bg-gray-200 p-2">
-            <option value="general">General</option>
-            <option value="voyages">Voyages</option>
-            <option value="cuisine">Cuisine</option>
-            <option value="animaux">Animaux</option>
-            <option value="astuces">Astuces</option>
-          </select>
-        </div>
-
-        <textarea
-          placeholder="Courte description"
-          className="w-full rounded bg-gray-200 p-4 text-black outline-none focus:ring-2 focus:ring-black"
-          {...register("desc")}
-        />
-
-        <div className="flex flex-col flex-1 w-full mt-4">
-          <MenuBar editor={editor} />
-          <div className="flex flex-col md:flex-row w-full gap-4">
-            <div className="flex flex-row md:flex-col gap-2">
-              <Upload type="image" setProgress={setProgress} setData={handleImageUpload}>
-                <span className="cursor-pointer font-bold text-gray-500 hover:text-black">⊕ Image</span>
-              </Upload>
-              <Upload type="video" setProgress={setProgress} setData={handleVideoUpload}>
-                <span className="cursor-pointer font-bold text-gray-500 hover:text-black">⊕ Vidéo</span>
-              </Upload>
-            </div>
-            <div className="flex-1 w-full">
-              <EditorContent editor={editor} className="w-full h-full min-h-[400px]" />
-            </div>
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={mutation.isPending || (0 < progress && progress < 100)}
-          className="my-4 w-36 self-end cursor-pointer rounded bg-black p-3 text-white font-semibold disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-200"
-        >
-          {mutation.isPending ? "En Cours..." : "Publier"}
-        </button>
+        {/* Cover Image Uploader */}
+        <div className="rounded-3xl border border-dashed border-zinc-300 bg-zinc-50/50 p-6 transition-colors hover:border-zinc-400">
+          {cover?.url ? (
+            <div className="relative aspect-[16/7] w-full overflow-hidden rounded-2xl bg-zinc-100">
+              <NextImage
+                src={cover.url}
+                alt="Couverture"
+                fill
+                className="object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => setCover(null)}
+                className="absolute top-3 right-3 rounded-xl bg-zinc-900/80 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md hover:bg-red-600 transition-colors"
+              >
+                ✕ Supprimer la couverture
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <Upload
+                type="image"
+                setProgress={setProgress}
+                setData={(data) => {
+                  setCover(data);
+                  toast.success("Photo de couverture ajoutée !");
+                }}
+              >
+                <div className="flex flex-col items-center gap-2 cursor-pointer">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 text-xl text-zinc-600 ring-1 ring-zinc-200">
+                    🖼️
+                  </span>
+                  <span className="text-sm font-semibold text-zinc-900">
+                    Ajouter une photo de couverture
+                  </span>
+                  <span className="text-xs text-zinc-400">
+                    JPEG, PNG ou WEBP pour illustrer votre article
+                  </span>
+                </div>
+              </Upload>
+            </div>
+          )}
+        </div>
+
+        {/* Title Input */}
+        <div>
+          <input
+            type="text"
+            placeholder="Titre de votre article..."
+            className="w-full bg-transparent text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 placeholder:text-zinc-300 focus:outline-none"
+            {...register("title")}
+          />
+          {errors.title && (
+            <p className="mt-2 text-xs font-semibold text-red-500">{errors.title.message as string}</p>
+          )}
+        </div>
+
+        {/* Category & Excerpt Controls */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Catégorie</label>
+            <select
+              {...register("category")}
+              className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-800 focus:border-zinc-900 focus:outline-none"
+            >
+              <option value="general">Général</option>
+              <option value="voyages">Voyages</option>
+              <option value="cuisine">Cuisine</option>
+              <option value="animaux">Animaux</option>
+              <option value="astuces">Astuces</option>
+            </select>
+          </div>
+
+          <div className="sm:col-span-2 space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Description courte (Extrait)</label>
+            <input
+              type="text"
+              placeholder="Un bref résumé de votre histoire..."
+              className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-800 focus:border-zinc-900 focus:outline-none"
+              {...register("desc")}
+            />
+          </div>
+        </div>
+
+        {/* Editor Body with Sticky MenuBar */}
+        <div className="rounded-3xl border border-zinc-200/80 bg-white p-4 shadow-xs">
+          <MenuBar
+            editor={editor}
+            setProgress={setProgress}
+            handleImageUpload={handleImageUpload}
+            handleVideoUpload={handleVideoUpload}
+          />
+          <div className="min-h-[450px]">
+            <EditorContent editor={editor} />
+          </div>
+        </div>
       </form>
     </div>
   );

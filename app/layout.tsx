@@ -30,17 +30,15 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider localization={frFR}>
-      <html lang="en" className={`${montserrat.variable} bg-[#ffffff] w-screen overflow-x-hidden font-display`}>
-        <body>
+      <html lang="fr" className={`${montserrat.variable} bg-white text-zinc-900 antialiased selection:bg-zinc-900 selection:text-white`}>
+        <body className="min-h-screen flex flex-col justify-between">
           <ReactQueryProvider>
-            <div className="flex min-h-screen flex-col justify-between px-4 md:px-8 lg:px-16 lx:px-32 2xl:px-64">
-              <div>
-                <Navbar />
-                {children}
-              </div>
-              <Footer />
-            </div>
-            <ToastContainer position="bottom-right" />
+            <Navbar />
+            <main className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8 py-6">
+              {children}
+            </main>
+            <Footer />
+            <ToastContainer position="bottom-right" autoClose={3000} />
           </ReactQueryProvider>
         </body>
       </html>

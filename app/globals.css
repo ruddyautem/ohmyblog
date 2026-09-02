@@ -4,16 +4,34 @@
   --font-display: "Montserrat", sans-serif;
 }
 
-@utility animatedButton {
-  animation-duration: 10000ms;
+html {
+  scroll-behavior: smooth;
 }
 
-.ql-container {
-  border: none !important;
+::selection {
+  background-color: #18181b;
+  color: #ffffff;
 }
-.ql-toolbar {
-  border: none !important;
+
+@utility animatedButton {
+  animation-duration: 12000ms;
 }
-.ql-editor {
-  border: none !important;
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
 }

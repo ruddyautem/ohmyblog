@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import Comment from "./Comment";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@clerk/nextjs";
@@ -42,38 +43,56 @@ const Comments = ({ postId }: { postId: string }) => {
   };
 
   return (
-    <div className="mb-12 flex flex-col gap-8 lg:w-3/5">
-      <h1 className="text-xl text-gray-500 underline">Commentaires</h1>
+    <section className="space-y-6 max-w-3xl">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
+          Commentaires {data ? `(${data.length})` : ""}
+        </h2>
+      </div>
+
       {user ? (
         <form
           id="comment-form"
           onSubmit={handleSubmit}
-          className="flex w-full items-center justify-between gap-8"
+          className="space-y-3 rounded-3xl border border-zinc-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all focus-within:border-zinc-400 focus-within:shadow-sm"
         >
           <textarea
             name="desc"
-            placeholder="Ajouter un commentaire..."
-            id=""
-            className="w-full rounded bg-gray-200 p-4 text-black outline-none focus:ring-2 focus:ring-black"
+            placeholder="Partagez votre avis ou posez une question..."
+            rows={3}
+            required
+            className="w-full resize-none bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none"
           />
-          <button className="cursor-pointer bg-black px-4 py-2 text-white transition-all duration-200 ease-in-out hover:scale-105">
-            Ajouter
-          </button>
+          <div className="flex items-center justify-end pt-2 border-t border-zinc-100">
+            <button
+              type="submit"
+              disabled={newCommentMutation.isPending}
+              className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all hover:bg-zinc-800 disabled:opacity-50"
+            >
+              {newCommentMutation.isPending ? "Publication..." : "Publier mon commentaire"}
+            </button>
+          </div>
         </form>
       ) : (
-        <p className="text-sm text-gray-500">Connectez-vous pour commenter</p>
+        <div className="rounded-2xl border border-zinc-200/60 bg-zinc-50 p-4 text-center text-sm text-zinc-600">
+          <Link href="/sign-in" className="font-semibold text-zinc-900 underline hover:text-zinc-700">Connectez-vous</Link> pour participer à la discussion.
+        </div>
       )}
+
       {isPending ? (
-        "Chargement..."
+        <div className="space-y-3 pt-2">
+          <div className="h-20 bg-zinc-100 rounded-2xl animate-pulse"></div>
+          <div className="h-20 bg-zinc-100 rounded-2xl animate-pulse"></div>
+        </div>
       ) : error ? (
-        "Erreur lors du chargement des Commentaires!"
+        <div className="py-4 text-sm text-red-500">Erreur lors du chargement des commentaires.</div>
       ) : (
-        <>
+        <div className="space-y-3 pt-2">
           {newCommentMutation.isPending && user && (
             <Comment
               comment={{
                 _id: "temp-optimistic-id",
-                desc: `${newCommentMutation.variables?.desc || ""} (En cours...)`,
+                desc: `${newCommentMutation.variables?.desc || ""}`,
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 userId: user.id,
@@ -86,12 +105,16 @@ const Comments = ({ postId }: { postId: string }) => {
               postId={postId}
             />
           )}
-          {data?.map((comment: CommentWithUser) => (
-            <Comment key={comment._id} comment={comment} postId={postId} />
-          ))}
-        </>
+          {data && data.length > 0 ? (
+            data.map((comment: CommentWithUser) => (
+              <Comment key={comment._id} comment={comment} postId={postId} />
+            ))
+          ) : (
+            <p className="text-sm text-zinc-400 py-4 italic">Soyez le premier à commenter cet article !</p>
+          )}
+        </div>
       )}
-    </div>
+    </section>
   );
 };
 

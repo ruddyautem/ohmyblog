@@ -6,9 +6,9 @@ import Search from "./Search";
 import Image from "next/image";
 
 const links = [
-  { label: "Tous les Posts", path: "/posts" },
-  { label: "Les Plus Visités", path: "/posts?sort=popular" },
-  { label: "Posts Vedettes", path: "/posts?sort=featured" },
+  { label: "Tous les posts", path: "/posts" },
+  { label: "Populaires", path: "/posts?sort=popular" },
+  { label: "En vedette", path: "/posts?sort=featured" },
 ];
 
 interface NavLinkProps {
@@ -22,7 +22,7 @@ const NavLink = ({ label, path, onClick, className = "" }: NavLinkProps) => (
   <Link
     href={path}
     onClick={onClick}
-    className={`flex h-10 max-w-56 items-center justify-center rounded bg-gray-100 text-center hover:bg-black hover:text-white ${className}`}
+    className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-zinc-900 hover:text-white ${className}`}
   >
     {label}
   </Link>
@@ -34,119 +34,155 @@ const Navbar = () => {
   const { openUserProfile, signOut } = useClerk();
 
   return (
-    <div className='flex h-16 w-full items-center justify-between md:h-20'>
-      {/* Logo */}
-      <Link
-        href='/'
-        className='mr-10 flex cursor-pointer items-center gap-3.5 text-xl md:text-2xl font-bold'
-      >
-        <Image
-          src='/logo.png'
-          alt='OhMyBlog Logo'
-          width={34}
-          height={34}
-          className='w-8 h-8 md:w-[34px] md:h-[34px] object-contain'
-        />
-        <span>OhMyBlog!</span>
-      </Link>
-
-      {/* Mobile Menu Toggle */}
-      <div className='lg:hidden'>
-        <div
-          className='cursor-pointer text-4xl'
-          onClick={() => setOpen((prev) => !prev)}
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-100 bg-white/80 backdrop-blur-md transition-all">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="group flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-90"
         >
-          <Image width={30} height={30}
-            src={open ? "/close.svg" : "/burger.svg"}
-            alt={open ? "Close Menu" : "Open Menu"}
-          />
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={`absolute top-16 z-50 flex h-screen w-full flex-col items-center justify-center gap-8 bg-white text-lg font-medium transition-all duration-300 ease-in-out ${
-            open ? "left-0" : "left-full"
-          }`}
-        >
-          <Suspense fallback='...'>
-            <Search onSubmit={() => setOpen(false)} />
-          </Suspense>
-          {links.map((link) => (
-            <NavLink
-              key={link.label}
-              label={link.label}
-              path={link.path}
-              onClick={() => setOpen(false)}
-              className='w-56'
+          <div className="relative overflow-hidden rounded-lg shadow-sm ring-1 ring-zinc-900/10">
+            <Image
+              src="/logo.png"
+              alt="OhMyBlog Logo"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain"
             />
-          ))}
+          </div>
+          <span className="text-xl font-bold tracking-tight text-zinc-900 md:text-2xl">
+            OhMyBlog<span className="text-zinc-400 font-light">!</span>
+          </span>
+        </Link>
+
+        {/* Desktop Menu */}
+        <div className="hidden items-center gap-3 lg:flex">
+          <Suspense fallback="...">
+            <Search />
+          </Suspense>
+
+          <nav className="flex items-center gap-1 rounded-full bg-zinc-100/70 p-1">
+            {links.map((link) => (
+              <NavLink
+                key={link.label}
+                label={link.label}
+                path={link.path}
+              />
+            ))}
+          </nav>
+
+          <Link
+            href="/write"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-zinc-800 hover:shadow-md"
+          >
+            <span>✍️ Écrire</span>
+          </Link>
+
           {!isSignedIn ? (
-            <Link href='/sign-in' onClick={() => setOpen(false)}>
-              <button className='h-10 w-56 cursor-pointer rounded bg-black text-white transition-all duration-200 ease-in-out hover:scale-105'>
-                Login
+            <Link href="/sign-in">
+              <button className="inline-flex items-center justify-center rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 transition-all hover:border-zinc-900 hover:bg-zinc-900 hover:text-white">
+                Se connecter
               </button>
             </Link>
           ) : (
-            <div className='flex flex-col gap-3'>
-              <button
-                type='button'
-                onClick={() => {
-                  setOpen(false);
-                  openUserProfile();
+            <div className="ml-1 flex items-center">
+              <UserButton
+                appearance={{
+                  elements: {
+                    userButtonAvatarBox: "h-9 w-9 !rounded-lg ring-1 ring-zinc-200",
+                    avatarImage: "!rounded-lg",
+                    avatarBox: "!rounded-lg",
+                  },
                 }}
-                className='flex h-10 w-56 cursor-pointer items-center justify-center rounded border border-black text-white bg-black text-sm font-medium transition-all duration-200'
-              >
-                <span>Compte</span>
-                
-              </button>
-              <button
-                type='button'
-                onClick={() => {
-                  setOpen(false);
-                  signOut();
-                }}
-                className='flex h-10 w-56 cursor-pointer items-center justify-center rounded border text-white text-sm font-medium bg-red-500 transition-all duration-200'
-              >
-                Se déconnecter
-              </button>
+              />
             </div>
           )}
         </div>
+
+        {/* Mobile Menu Toggle Button */}
+        <div className="flex items-center gap-3 lg:hidden">
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:bg-zinc-100"
+            onClick={() => setOpen((prev) => !prev)}
+            aria-label="Toggle menu"
+          >
+            <Image
+              width={20}
+              height={20}
+              src={open ? "/close.svg" : "/burger.svg"}
+              alt={open ? "Fermer" : "Menu"}
+              className="h-5 w-5 object-contain"
+            />
+          </button>
+        </div>
       </div>
 
-      {/* Desktop Menu */}
-      <div className='hidden items-center gap-4 text-xs font-medium lg:flex xl:gap-4'>
-        <Suspense fallback='...'>
-          <Search />
-        </Suspense>
-        {links.map((link) => (
-          <NavLink
-            key={link.label}
-            label={link.label}
-            path={link.path}
-            className='h-10 w-36'
-          />
-        ))}
+      {/* Mobile Menu Drawer */}
+      {open && (
+        <div className="fixed inset-x-0 top-16 z-50 flex h-[calc(100vh-4rem)] flex-col justify-between border-t border-zinc-100 bg-white/95 p-6 backdrop-blur-xl lg:hidden animate-in fade-in slide-in-from-top-4 duration-200">
+          <div className="flex flex-col gap-4">
+            <Suspense fallback="...">
+              <Search onSubmit={() => setOpen(false)} />
+            </Suspense>
 
-        {!isSignedIn ? (
-          <Link href='/sign-in'>
-            <button className='h-10 w-36 cursor-pointer rounded bg-black text-white transition-all duration-200 ease-in-out hover:scale-105'>
-              Login
-            </button>
-          </Link>
-        ) : (
-          <UserButton
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "!rounded-none",
-                avatarImage: "!rounded-none",
-                avatarBox: "!rounded-none",
-              },
-            }}
-          />
-        )}
-      </div>
-    </div>
+            <nav className="flex flex-col gap-2 pt-4">
+              {links.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.path}
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl bg-zinc-50 px-4 py-3 text-base font-medium text-zinc-800 transition-colors hover:bg-zinc-100"
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <Link
+                href="/write"
+                onClick={() => setOpen(false)}
+                className="rounded-xl bg-zinc-900 px-4 py-3 text-center text-base font-medium text-white shadow-sm transition-colors hover:bg-zinc-800"
+              >
+                ✍️ Écrire un post
+              </Link>
+            </nav>
+          </div>
+
+          <div className="pt-6 border-t border-zinc-100">
+            {!isSignedIn ? (
+              <Link href="/sign-in" onClick={() => setOpen(false)}>
+                <button className="w-full rounded-xl border border-zinc-300 py-3 text-center text-base font-medium text-zinc-900 transition-colors hover:bg-zinc-900 hover:text-white">
+                  Se connecter
+                </button>
+              </Link>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    openUserProfile();
+                  }}
+                  className="flex w-full items-center justify-between rounded-xl bg-zinc-100 px-4 py-3 text-base font-medium text-zinc-900 transition-colors hover:bg-zinc-200"
+                >
+                  <span>Gérer mon compte</span>
+                  <span className="text-xs text-zinc-500">⚙️</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    signOut();
+                  }}
+                  className="w-full rounded-xl border border-red-200 bg-red-50/50 py-3 text-center text-base font-medium text-red-600 transition-colors hover:bg-red-500 hover:text-white"
+                >
+                  Se déconnecter
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
   );
 };
 

@@ -30,12 +30,13 @@ const Search = ({ onSubmit }: { onSubmit?: () => void }) => {
   };
 
   return (
-    <div className="flex h-10 max-h-10 w-56 items-center justify-center gap-2 rounded bg-gray-100 px-2 placeholder:text-center focus-within:outline-2 focus-within:outline-black">
-      <Image src="/search.svg" alt="Search" width={16} height={16} />
+    <div className="relative flex h-9.5 w-full lg:w-52 items-center rounded-full bg-zinc-100/90 px-3 text-sm text-zinc-900 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-zinc-900/10 focus-within:shadow-sm">
+      <Image src="/search.svg" alt="Search" width={14} height={14} className="opacity-45 mr-2 flex-shrink-0" />
       <input
         type="text"
-        placeholder="Chercher un post..."
-        className="w-full bg-transparent outline-none placeholder:text-center"
+        placeholder="Rechercher..."
+        defaultValue={searchParams.get("search") || ""}
+        className="w-full bg-transparent text-xs text-zinc-800 placeholder:text-zinc-400 focus:outline-none"
         onKeyDown={handleKeyPress}
       />
     </div>
