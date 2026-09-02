@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "./Image";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "timeago.js";
@@ -7,6 +8,8 @@ import "@/lib/timeago-fr";
 import { getPostsAction } from "@/app/actions";
 
 const FeaturedPosts = () => {
+  const router = useRouter();
+
   const fetchPost = async () => {
     const res = await getPostsAction(1, { featured: "true", limit: "4" });
     return res;
@@ -40,17 +43,13 @@ const FeaturedPosts = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         {/* Main Hero Featured Post */}
         <div className="lg:col-span-7">
-          <article className="group relative flex h-full flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-4.5 sm:p-6 lg:p-7 shadow-xs transition-colors duration-200 hover:border-zinc-300 hover:shadow-md cursor-pointer">
-            {/* Master Stretched Link */}
-            <Link
-              href={`/${posts[0].slug}`}
-              className="absolute inset-0 z-0 rounded-3xl"
-              aria-label={posts[0].title}
-            />
-
+          <Link
+            href={`/${posts[0].slug}`}
+            className="group relative flex h-full flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-4.5 sm:p-6 lg:p-7 shadow-xs transition-colors duration-200 hover:border-zinc-300 hover:shadow-md cursor-pointer block"
+          >
             <div>
               {posts[0].img && (
-                <div className="relative z-10 block aspect-video w-full overflow-hidden rounded-2xl bg-zinc-100">
+                <div className="relative block aspect-video w-full overflow-hidden rounded-2xl bg-zinc-100">
                   <Image
                     src={posts[0].img}
                     alt={posts[0].title}
@@ -65,37 +64,43 @@ const FeaturedPosts = () => {
                 </div>
               )}
 
-              <div className="mt-4 sm:mt-5 flex items-center gap-3 text-xs text-zinc-500 relative z-20">
-                <Link
-                  href={`/posts?cat=${posts[0].category}`}
+              <div className="mt-4 sm:mt-5 flex items-center gap-3 text-xs text-zinc-500">
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/posts?cat=${posts[0].category}`);
+                  }}
                   className="rounded-full bg-zinc-100 px-2.5 py-1 font-semibold text-zinc-800 capitalize transition-colors hover:bg-zinc-900 hover:text-white"
                 >
                   {posts[0].category}
-                </Link>
+                </span>
                 <span>•</span>
                 <span>{format(posts[0].createdAt, "fr")}</span>
                 <span>•</span>
                 <span>{posts[0].visit} vues</span>
               </div>
 
-              <h2 className="relative z-10 mt-3 text-xl font-bold tracking-tight text-zinc-900 transition-colors sm:text-2xl lg:text-3xl group-hover:text-zinc-700">
+              <h2 className="mt-3 text-xl font-bold tracking-tight text-zinc-900 transition-colors sm:text-2xl lg:text-3xl group-hover:text-zinc-700">
                 {posts[0].title}
               </h2>
 
               {posts[0].desc && (
-                <p className="relative z-10 mt-2 text-sm text-zinc-600 line-clamp-2 leading-relaxed">
+                <p className="mt-2 text-sm text-zinc-600 line-clamp-2 leading-relaxed">
                   {posts[0].desc}
                 </p>
               )}
             </div>
 
-            <div className="relative z-10 mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between">
+            <div className="mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between">
               <span className="text-sm font-semibold text-zinc-900 group-hover:text-zinc-600 transition-colors inline-flex items-center gap-1">
                 <span>Lire l&apos;article complet</span>
                 <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
               </span>
             </div>
-          </article>
+          </Link>
         </div>
 
         {/* Side Ranked Featured Posts with Bordered Frame */}
@@ -110,19 +115,13 @@ const FeaturedPosts = () => {
               const number = `0${idx + 2}`;
 
               return (
-                <article
+                <Link
                   key={post._id}
-                  className="group relative flex flex-col sm:flex-row gap-3.5 sm:gap-4 rounded-2xl border border-zinc-200/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors duration-200 hover:border-zinc-400 hover:bg-zinc-50/50 cursor-pointer"
+                  href={`/${post.slug}`}
+                  className="group relative flex flex-col sm:flex-row gap-3.5 sm:gap-4 rounded-2xl border border-zinc-200/80 bg-white p-3.5 sm:p-4 shadow-2xs transition-colors duration-200 hover:border-zinc-400 hover:bg-zinc-50/50 cursor-pointer block"
                 >
-                  {/* Master Stretched Link */}
-                  <Link
-                    href={`/${post.slug}`}
-                    className="absolute inset-0 z-0 rounded-2xl"
-                    aria-label={post.title}
-                  />
-
                   {post?.img && (
-                    <div className="relative z-10 block aspect-video sm:aspect-auto w-full sm:h-32 sm:w-40 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100">
+                    <div className="relative block aspect-video sm:aspect-auto w-full sm:h-32 sm:w-40 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100">
                       <Image
                         src={post.img}
                         alt={post.title}
@@ -132,18 +131,24 @@ const FeaturedPosts = () => {
                     </div>
                   )}
 
-                  <div className="relative z-10 flex flex-1 flex-col justify-between py-0.5 min-w-0">
+                  <div className="flex flex-1 flex-col justify-between py-0.5 min-w-0">
                     <div>
-                      <div className="flex items-center gap-2 text-xs relative z-20">
+                      <div className="flex items-center gap-2 text-xs">
                         <span className="font-mono text-xs font-bold text-zinc-400 transition-colors group-hover:text-zinc-900">
                           {number}
                         </span>
-                        <Link
-                          href={`/posts?cat=${post.category}`}
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            router.push(`/posts?cat=${post.category}`);
+                          }}
                           className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold text-zinc-800 capitalize transition-colors hover:bg-zinc-900 hover:text-white"
                         >
                           {post.category}
-                        </Link>
+                        </span>
                         <span className="text-zinc-400">•</span>
                         <span className="text-zinc-400 text-xs">{format(post.createdAt, "fr")}</span>
                       </div>
@@ -170,7 +175,7 @@ const FeaturedPosts = () => {
                       </span>
                     </div>
                   </div>
-                </article>
+                </Link>
               );
             })}
           </div>
