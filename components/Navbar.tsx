@@ -11,22 +11,55 @@ const links = [
   { label: "En vedette", path: "/posts?sort=featured" },
 ];
 
-interface NavLinkProps {
-  label: string;
-  path: string;
-  onClick?: () => void;
-  className?: string;
-}
+const NavSelectors = () => {
+  const [hoverStyle, setHoverStyle] = useState<{ left: number; width: number; opacity: number }>({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
 
-const NavLink = ({ label, path, onClick, className = "" }: NavLinkProps) => (
-  <Link
-    href={path}
-    onClick={onClick}
-    className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-zinc-700 transition-all duration-200 hover:bg-zinc-900 hover:text-white ${className}`}
-  >
-    {label}
-  </Link>
-);
+  const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = e.currentTarget;
+    setHoverStyle({
+      left: target.offsetLeft,
+      width: target.offsetWidth,
+      opacity: 1,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setHoverStyle((prev) => ({ ...prev, opacity: 0 }));
+  };
+
+  return (
+    <nav
+      onMouseLeave={handleMouseLeave}
+      className="relative flex items-center rounded-full bg-zinc-100/90 p-1 border border-zinc-200/60"
+    >
+      {/* Sliding Pill Background Indicator */}
+      <span
+        className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-zinc-900 shadow-xs transition-all duration-300 ease-out"
+        style={{
+          transform: `translateX(${hoverStyle.left}px)`,
+          width: `${hoverStyle.width}px`,
+          opacity: hoverStyle.opacity,
+          left: 0,
+        }}
+      />
+
+      {links.map((link) => (
+        <Link
+          key={link.label}
+          href={link.path}
+          onMouseEnter={handleMouseEnter}
+          className="relative z-10 inline-flex items-center justify-center rounded-full px-4 py-1.5 text-sm font-medium text-zinc-700 transition-colors duration-200 hover:text-white"
+        >
+          {link.label}
+        </Link>
+      ))}
+    </nav>
+  );
+};
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -51,7 +84,7 @@ const Navbar = () => {
             />
           </div>
           <span className="text-xl font-bold tracking-tight text-zinc-900 md:text-2xl">
-            OhMyBlog<span className="text-zinc-400 font-light">!</span>
+            OhMyBlog!
           </span>
         </Link>
 
@@ -61,15 +94,7 @@ const Navbar = () => {
             <Search />
           </Suspense>
 
-          <nav className="flex items-center gap-1 rounded-full bg-zinc-100/70 p-1">
-            {links.map((link) => (
-              <NavLink
-                key={link.label}
-                label={link.label}
-                path={link.path}
-              />
-            ))}
-          </nav>
+          <NavSelectors />
 
           <Link
             href="/write"

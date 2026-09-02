@@ -15,7 +15,7 @@ const Footer = () => {
             className="h-6 w-6 object-contain rounded-md"
           />
           <span className="text-sm font-bold tracking-tight text-zinc-900">
-            OhMyBlog<span className="text-zinc-400 font-light">!</span>
+            OhMyBlog!
           </span>
         </div>
 
