@@ -30,11 +30,14 @@ export async function POST(req: Request) {
     let evt: WebhookEvent;
 
     try {
-      evt = wh.verify(body, {
+      const verified = wh.verify(body, {
         "svix-id": svix_id,
         "svix-timestamp": svix_timestamp,
         "svix-signature": svix_signature,
-      }) as unknown as WebhookEvent;
+      });
+      evt = (typeof verified === "string"
+        ? JSON.parse(verified)
+        : (verified || JSON.parse(body))) as WebhookEvent;
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : "Verification failed";
       console.error("[Clerk Webhook] Signature verification failed:", errorMsg);
@@ -43,7 +46,21 @@ export async function POST(req: Request) {
       });
     }
 
-    const eventType = evt.type;
+    if (!evt) {
+      try {
+        evt = JSON.parse(body) as WebhookEvent;
+      } catch (parseErr) {
+        console.error("[Clerk Webhook] Failed to parse payload:", parseErr);
+        return new Response("Error: Invalid JSON payload", { status: 400 });
+      }
+    }
+
+    const eventType = evt?.type;
+    if (!eventType) {
+      console.error("[Clerk Webhook] No event type found in payload:", evt);
+      return new Response("Error: Missing event type in payload", { status: 400 });
+    }
+
     console.log(`[Clerk Webhook] Successfully verified and processing event: ${eventType}`);
 
     if (eventType === "user.created" || eventType === "user.updated") {
