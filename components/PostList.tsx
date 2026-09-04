@@ -68,7 +68,7 @@ const PostList = () => {
   if (allPosts.length === 0) {
     return (
       <div className="rounded-3xl border border-zinc-200/80 bg-zinc-50/50 p-12 text-center">
-        <p className="text-base font-semibold text-zinc-700">Aucun article trouvé</p>
+        <p className="text-base font-semibold text-zinc-700">Aucun post trouvé</p>
         <p className="mt-1 text-xs text-zinc-400">Essayez de modifier vos filtres ou effectuez une autre recherche.</p>
       </div>
     );
@@ -85,7 +85,7 @@ const PostList = () => {
         {isFetchingNextPage && (
           <div className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-500">
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900"></span>
-            <span>Chargement des articles suivants...</span>
+            <span>Chargement des posts suivants...</span>
           </div>
         )}
       </div>

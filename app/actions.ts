@@ -296,7 +296,7 @@ export async function getPostsAction(page: number, searchParamsObj: Record<strin
     const user = await db.query.users.findFirst({ where: eq(users.username, searchParamsObj.author) });
     if (user) conditions.push(eq(posts.userId, user._id));
   }
-  if (searchParamsObj.featured) conditions.push(eq(posts.isFeatured, true));
+  if (searchParamsObj.featured || searchParamsObj.sort === "featured") conditions.push(eq(posts.isFeatured, true));
   
   const limit = searchParamsObj.limit ? parseInt(searchParamsObj.limit) : 10;
   const offset = (page - 1) * limit;
@@ -306,7 +306,7 @@ export async function getPostsAction(page: number, searchParamsObj: Record<strin
     with: { user: true },
     orderBy: (postsTable, { desc, asc }) => {
       if (searchParamsObj.sort === "oldest") return [asc(postsTable.createdAt)];
-      if (searchParamsObj.sort === "popular" || searchParamsObj.sort === "trending") return [desc(postsTable.visit)];
+      if (searchParamsObj.sort === "popular") return [desc(postsTable.visit)];
       return [desc(postsTable.createdAt)];
     },
     limit: limit + 1,

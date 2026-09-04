@@ -2,6 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import MobileCategoryBar from "@/components/MobileCategoryBar";
 import "./globals.css";
 import { ReactQueryProvider } from "./ReactQueryProvider";
 import { Toaster } from "sonner";
@@ -33,7 +34,8 @@ export default function RootLayout({
         <body className="min-h-screen flex flex-col justify-between">
           <ReactQueryProvider>
             <Navbar />
-            <main className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl flex-1 px-4 sm:px-6 lg:px-8 py-8">
+            <main className="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+              <MobileCategoryBar />
               {children}
             </main>
             <Footer />

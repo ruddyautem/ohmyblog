@@ -171,7 +171,7 @@ const Write = () => {
       return await createPostAction(newPost);
     },
     onSuccess: (res) => {
-      toast.success("Article publié avec succès !");
+      toast.success("Post publié avec succès !");
       reset();
       editor?.commands.setContent('');
       setCover(null);
@@ -187,7 +187,7 @@ const Write = () => {
     return (
       <div className="py-20 text-center space-y-4">
         <h2 className="text-2xl font-bold text-zinc-900">Connexion requise</h2>
-        <p className="text-zinc-600">Vous devez être connecté pour rédiger et publier un article.</p>
+        <p className="text-zinc-600">Vous devez être connecté pour rédiger et publier un post.</p>
         <Link href="/sign-in" className="inline-block rounded-full bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white">
           Se connecter
         </Link>
@@ -210,7 +210,7 @@ const Write = () => {
         {/* Top Actions Bar */}
         <div className="flex items-center justify-between border-b border-zinc-100 pb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Nouvel article</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Nouveau post</h1>
             <p className="text-xs text-zinc-500 mt-0.5">Rédigez et partagez votre histoire</p>
           </div>
 
@@ -254,7 +254,7 @@ const Write = () => {
                     Ajouter une photo de couverture
                   </span>
                   <span className="text-xs text-zinc-400">
-                    JPEG, PNG ou WEBP pour illustrer votre article
+                    JPEG, PNG ou WEBP pour illustrer votre post
                   </span>
                 </div>
               </Upload>
@@ -265,7 +265,7 @@ const Write = () => {
         {/* Title Input */}
         <div className="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-xs focus-within:border-zinc-900 focus-within:ring-2 focus-within:ring-zinc-900/10 transition-all">
           <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-            Titre de l&apos;article
+            Titre du post
           </label>
           <input
             type="text"
@@ -322,9 +322,9 @@ const Write = () => {
             <button
               type="submit"
               disabled={mutation.isPending || (0 < progress && progress < 100)}
-              className="inline-flex w-full sm:w-48 sm:ml-auto items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 disabled:opacity-50"
+              className="inline-flex w-full sm:w-48 sm:ml-auto items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 disabled:opacity-50 cursor-pointer"
             >
-              {mutation.isPending ? "Publication..." : "Publier l'article"}
+              {mutation.isPending ? "Publication..." : "Publier le post"}
             </button>
           </div>
       </form>

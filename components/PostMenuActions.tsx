@@ -139,7 +139,7 @@ const PostMenuAction = ({ post }: { post: PostWithUser }) => {
             onClick={handleDelete}
           >
             <Image src="/trash.svg" alt="Delete" width={18} height={18} />
-            <span>Supprimer l&apos;article</span>
+            <span>Supprimer le post</span>
           </button>
         )}
       </div>

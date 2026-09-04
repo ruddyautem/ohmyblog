@@ -91,7 +91,7 @@ const PostListItem = ({ post }: { post: PostWithUser }) => {
             {(post.visit ?? 0)} vue{(post.visit ?? 0) > 1 ? "s" : ""}
           </span>
           <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-900 group-hover:text-zinc-600 transition-colors">
-            <span>Lire l&apos;article</span>
+            <span>Lire le post</span>
             <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
           </span>
         </div>
