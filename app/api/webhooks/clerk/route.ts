@@ -69,21 +69,30 @@ export async function POST(req: Request) {
       const baseUsername = userData.username || email.split("@")[0] || `user_${userData.id.slice(-8)}`;
       const img = userData.image_url || null;
 
-      const existingUser = await db.query.users.findFirst({
+      // Check by clerkUserId first
+      let existingUser = await db.query.users.findFirst({
         where: eq(users.clerkUserId, userData.id!),
       });
+
+      // If not found by clerkUserId, check by email (handles re-registration with same email)
+      if (!existingUser && email) {
+        existingUser = await db.query.users.findFirst({
+          where: eq(users.email, email),
+        });
+      }
 
       if (existingUser) {
         await db
           .update(users)
           .set({
+            clerkUserId: userData.id!, // Sync to latest Clerk user ID
             username: userData.username || existingUser.username,
             email: email || existingUser.email,
             img: img || existingUser.img,
             updatedAt: new Date(),
           })
-          .where(eq(users.clerkUserId, userData.id!));
-        console.log(`[Clerk Webhook] Updated existing user ${existingUser.username}`);
+          .where(eq(users._id, existingUser._id));
+        console.log(`[Clerk Webhook] Updated user ${existingUser.username} (Synced clerkUserId: ${userData.id!})`);
       } else {
         let finalUsername = baseUsername;
         const usernameConflict = await db.query.users.findFirst({
@@ -105,7 +114,7 @@ export async function POST(req: Request) {
             updatedAt: new Date(),
           })
           .onConflictDoNothing();
-        console.log(`[Clerk Webhook] Created new user ${finalUsername}`);
+        console.log(`[Clerk Webhook] Created new user ${finalUsername} (clerkUserId: ${userData.id!})`);
       }
     }
 
@@ -167,10 +176,10 @@ export async function POST(req: Request) {
           }
 
           await db.delete(users).where(eq(users._id, existingUser._id));
-          console.log(`[Clerk Webhook] Deleted user ${existingUser.username} (${existingUser._id}) and cascaded records.`);
+          console.log(`[Clerk Webhook] Successfully deleted user ${existingUser.username} (${existingUser._id}) and cascaded records.`);
         } else {
           await db.delete(users).where(eq(users.clerkUserId, id));
-          console.log(`[Clerk Webhook] Fallback delete for clerkUserId: ${id}`);
+          console.log(`[Clerk Webhook] Executed fallback delete for clerkUserId: ${id}`);
         }
       }
     }
