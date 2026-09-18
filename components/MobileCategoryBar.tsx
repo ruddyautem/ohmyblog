@@ -108,6 +108,14 @@ const MobileCategoryBarContent = () => {
     }
   }, [dropdownOpen, dropdownActiveIndex, currentSort, pathname, currentCat]);
 
+  if (
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname === "/write"
+  ) {
+    return null;
+  }
+
   return (
     <div className="block lg:hidden w-full mb-6">
       <div
@@ -115,15 +123,15 @@ const MobileCategoryBarContent = () => {
         onMouseLeave={() => setDropdownOpen(false)}
         className="relative w-full max-w-md mx-auto"
       >
-        <div className="relative flex items-center justify-between w-full rounded-full bg-zinc-100/90 p-1 border border-zinc-200/60 shadow-2xs">
+        <div className="relative flex items-center justify-between w-full rounded-full bg-zinc-100/90 dark:bg-[#121826] p-1 border border-zinc-200/60 dark:border-slate-800 shadow-2xs">
           {/* Tous les posts Dropdown Trigger Button (Dynamic Label) */}
           <button
             type="button"
             onClick={() => setDropdownOpen((prev) => !prev)}
             className={`cursor-pointer inline-flex items-center gap-1 justify-center rounded-full px-2.5 sm:px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors duration-150 shrink-0 ${
               dropdownOpen || (pathname === "/posts" && !currentCat)
-                ? "text-zinc-950 font-bold"
-                : "text-zinc-600 hover:text-zinc-950"
+                ? "text-zinc-950 dark:text-white font-bold"
+                : "text-zinc-600 dark:text-slate-400 hover:text-zinc-950 dark:hover:text-white"
             }`}
           >
             <span>{mobileDropdownLabel}</span>
@@ -137,11 +145,11 @@ const MobileCategoryBarContent = () => {
             </svg>
           </button>
 
-          {/* Categories Bar with Solid Black Smooth Sliding Pill */}
+          {/* Categories Bar with Solid Smooth Sliding Pill */}
           <nav className="relative flex items-center flex-1 justify-around gap-0.5 sm:gap-1">
-            {/* Solid Black Smooth Sliding Pill */}
+            {/* Solid Smooth Sliding Pill */}
             <span
-              className="pointer-events-none absolute top-0 bottom-0 rounded-full bg-zinc-900 shadow-xs transition-all duration-300 ease-out"
+              className="pointer-events-none absolute top-0 bottom-0 rounded-full bg-zinc-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 shadow-xs dark:shadow-[0_0_12px_rgba(99,102,241,0.4)] transition-all duration-300 ease-out"
               style={{
                 transform: `translateX(${pillStyle.left}px)`,
                 width: `${pillStyle.width}px`,
@@ -164,7 +172,7 @@ const MobileCategoryBarContent = () => {
                   className={`relative z-10 inline-flex items-center justify-center rounded-full px-2 sm:px-2.5 py-1.5 text-[11px] sm:text-xs font-medium whitespace-nowrap transition-colors duration-200 ${
                     isSelected
                       ? "text-white font-semibold"
-                      : "text-zinc-600 hover:text-zinc-950"
+                      : "text-zinc-600 dark:text-slate-400 hover:text-zinc-950 dark:hover:text-white"
                   }`}
                 >
                   {link.label}
@@ -177,10 +185,10 @@ const MobileCategoryBarContent = () => {
         {/* Dropdown Menu spanning almost full width on mobile */}
         {dropdownOpen && (
           <div className="absolute inset-x-0 top-full pt-2 z-40 origin-top transform transition-all duration-200 ease-out animate-in fade-in slide-in-from-top-2">
-            <div className="relative flex flex-col gap-1 rounded-2xl border border-zinc-200/90 bg-white/98 p-1.5 shadow-2xl ring-1 ring-black/5 backdrop-blur-md">
-              {/* Smooth Sliding Black Pill Indicator inside Dropdown */}
+            <div className="relative flex flex-col gap-1 rounded-2xl border border-zinc-200/90 dark:border-slate-800 bg-white/98 dark:bg-[#121826]/95 p-1.5 shadow-2xl dark:shadow-[0_12px_40px_rgba(0,0,0,0.6)] ring-1 ring-black/5 dark:ring-slate-700/50 backdrop-blur-md">
+              {/* Smooth Sliding Pill Indicator inside Dropdown */}
               <span
-                className="pointer-events-none absolute left-1.5 right-1.5 rounded-xl bg-zinc-900 shadow-sm transition-all duration-200 ease-out"
+                className="pointer-events-none absolute left-1.5 right-1.5 rounded-xl bg-zinc-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 shadow-sm dark:shadow-[0_0_12px_rgba(99,102,241,0.35)] transition-all duration-200 ease-out"
                 style={{
                   transform: `translateY(${dropdownPillStyle.top}px)`,
                   height: `${dropdownPillStyle.height}px`,
@@ -202,12 +210,12 @@ const MobileCategoryBarContent = () => {
                     className={`relative z-10 flex items-center justify-between rounded-xl px-4 py-2.5 transition-colors duration-150 ${
                       isSelected
                         ? "text-white font-semibold"
-                        : "text-zinc-700 hover:text-zinc-950"
+                        : "text-zinc-700 dark:text-slate-300 hover:text-zinc-950 dark:hover:text-white"
                     }`}
                   >
                     <div className="flex flex-col text-left">
                       <span className="text-xs sm:text-sm font-semibold leading-snug">{opt.label}</span>
-                      <span className={`text-[10px] sm:text-xs leading-tight mt-0.5 ${isSelected ? "text-zinc-300" : "text-zinc-400"}`}>
+                      <span className={`text-[10px] sm:text-xs leading-tight mt-0.5 ${isSelected ? "text-indigo-100" : "text-zinc-400 dark:text-slate-400"}`}>
                         {opt.desc}
                       </span>
                     </div>
@@ -227,7 +235,7 @@ const MobileCategoryBarContent = () => {
 
 const MobileCategoryBar = () => {
   return (
-    <Suspense fallback={<div className="block lg:hidden h-11 w-full mb-6 rounded-full bg-zinc-100 animate-pulse" />}>
+    <Suspense fallback={<div className="block lg:hidden h-11 w-full mb-6 rounded-full bg-zinc-100 dark:bg-[#121826] animate-pulse" />}>
       <MobileCategoryBarContent />
     </Suspense>
   );

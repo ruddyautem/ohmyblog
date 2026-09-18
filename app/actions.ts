@@ -5,6 +5,7 @@ import { posts, comments, savedPosts, users } from "@/lib/db/schema";
 import { eq, and, ilike } from "drizzle-orm";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 async function getOrCreateDbUser(clerkUserId: string) {
   let user = await db.query.users.findFirst({ where: eq(users.clerkUserId, clerkUserId) });
@@ -48,10 +49,26 @@ export async function createPostAction(data: CreatePostData) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
+  // Anti-spam Rate Limiting: Max 5 posts per 10 minutes per user
+  const rate = checkRateLimit(`createPost:${userId}`, 5, 10 * 60 * 1000);
+  if (!rate.success) {
+    throw new Error(`Limite de publication atteinte. Veuillez patienter ${rate.reset} secondes avant de réessayer.`);
+  }
+
+  // Server-side Input Validation
+  const trimmedTitle = data.title?.trim() || "";
+  if (trimmedTitle.length < 3 || trimmedTitle.length > 150) {
+    throw new Error("Le titre doit contenir entre 3 et 150 caractères.");
+  }
+  const trimmedContent = data.content?.trim() || "";
+  if (trimmedContent.length < 10) {
+    throw new Error("Le contenu de l'article doit contenir au moins 10 caractères.");
+  }
+
   const user = await getOrCreateDbUser(userId);
   if (!user) throw new Error("User not found");
 
-  const cleanTitle = data.title
+  const cleanTitle = trimmedTitle
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
@@ -136,6 +153,7 @@ export async function createPostAction(data: CreatePostData) {
   await db.insert(posts).values(newPost);
   revalidatePath('/');
   revalidatePath('/posts');
+  revalidatePath('/sitemap.xml');
   return newPost;
 }
 
@@ -143,12 +161,23 @@ export async function addCommentAction(postId: string, desc: string) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
+  // Anti-spam Rate Limiting: Max 5 comments per minute per user
+  const rate = checkRateLimit(`comment:${userId}`, 5, 60 * 1000);
+  if (!rate.success) {
+    throw new Error(`Vous commentez trop vite. Veuillez patienter ${rate.reset} secondes avant de réessayer.`);
+  }
+
+  const trimmedDesc = desc?.trim() || "";
+  if (trimmedDesc.length < 1 || trimmedDesc.length > 2000) {
+    throw new Error("Le commentaire doit contenir entre 1 et 2000 caractères.");
+  }
+
   const user = await getOrCreateDbUser(userId);
   if (!user) throw new Error("User not found");
 
   const newComment = {
     _id: crypto.randomUUID(),
-    desc,
+    desc: trimmedDesc,
     userId: user._id,
     postId: postId,
     createdAt: new Date(),
@@ -220,7 +249,7 @@ export async function deletePostAction(postId: string) {
   const post = await db.query.posts.findFirst({ where: eq(posts._id, postId) });
   if (!post) throw new Error("Post introuvable");
 
-  const isAdmin = user.username === "admin" || user.clerkUserId === process.env.NEXT_PUBLIC_CLERK_ADMIN_ID;
+  const isAdmin = !!process.env.NEXT_PUBLIC_CLERK_ADMIN_ID && user.clerkUserId === process.env.NEXT_PUBLIC_CLERK_ADMIN_ID;
   const isOwner = post.userId === user._id;
   if (!isOwner && !isAdmin) throw new Error("Forbidden");
 
@@ -277,13 +306,17 @@ export async function deletePostAction(postId: string) {
     console.error("Erreur lors de la suppression des images sur Cloudflare R2:", err);
   }
 
-  // 2. Cascade delete in SQLite (comments, bookmarks, and post)
+  // 2. Cascade delete (comments, bookmarks, and post)
   await db.delete(comments).where(eq(comments.postId, postId));
   await db.delete(savedPosts).where(eq(savedPosts.postId, postId));
   await db.delete(posts).where(eq(posts._id, postId));
 
   revalidatePath("/");
   revalidatePath("/posts");
+  if (post.slug) {
+    revalidatePath(`/${post.slug}`);
+  }
+  revalidatePath("/sitemap.xml");
   return true;
 }
 
@@ -298,8 +331,10 @@ export async function getPostsAction(page: number, searchParamsObj: Record<strin
   }
   if (searchParamsObj.featured || searchParamsObj.sort === "featured") conditions.push(eq(posts.isFeatured, true));
   
-  const limit = searchParamsObj.limit ? parseInt(searchParamsObj.limit) : 10;
-  const offset = (page - 1) * limit;
+  const safePage = Math.max(1, page || 1);
+  const parsedLimit = parseInt(searchParamsObj.limit) || 10;
+  const limit = Math.min(Math.max(1, parsedLimit), 50);
+  const offset = (safePage - 1) * limit;
 
   const fetchedPosts = await db.query.posts.findMany({
     where: conditions.length > 0 ? and(...conditions) : undefined,
@@ -329,7 +364,7 @@ export async function deleteCommentAction(commentId: string) {
   const comment = await db.query.comments.findFirst({ where: eq(comments._id, commentId) });
   if (!comment) throw new Error("Comment not found");
 
-  const isAdmin = user.username === "admin"; // adjust if you have a role field
+  const isAdmin = !!process.env.NEXT_PUBLIC_CLERK_ADMIN_ID && user.clerkUserId === process.env.NEXT_PUBLIC_CLERK_ADMIN_ID;
   const isOwner = comment.userId === user._id;
 
   if (!isOwner && !isAdmin) throw new Error("Forbidden");
@@ -387,7 +422,9 @@ export async function getPresignedUploadUrlAction(filename: string, contentType:
     ? `posts/${folder.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase()}`
     : "uploads";
 
-  const uniqueKey = `${cleanFolder}/${cleanFilename}`;
+  // Unique UUID prefix to prevent collisions and accidental file overwrites
+  const fileId = crypto.randomUUID().slice(0, 8);
+  const uniqueKey = `${cleanFolder}/${fileId}-${cleanFilename}`;
 
   const command = new PutObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME || "ohmyblog-uploads",

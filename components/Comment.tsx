@@ -26,14 +26,14 @@ const Comment = ({ comment, postId }: { comment: CommentWithUser; postId: string
   });
 
   return (
-    <div className="rounded-2xl border border-zinc-100 bg-zinc-50/70 p-4.5 space-y-3 transition-colors hover:bg-zinc-50">
+    <div className="rounded-2xl border border-zinc-100 dark:border-slate-800/80 bg-zinc-50/70 dark:bg-[#121826]/70 p-4.5 space-y-3 transition-colors hover:bg-zinc-50 dark:hover:bg-[#121826]">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {comment.user.img ? (
             <Image
               src={comment.user.img}
               alt={comment.user.username}
-              className="h-9 w-9 rounded-xl object-cover ring-1 ring-zinc-200"
+              className="h-9 w-9 rounded-xl object-cover ring-1 ring-zinc-200 dark:ring-slate-700"
               w={36}
               h={36}
             />
@@ -43,12 +43,12 @@ const Comment = ({ comment, postId }: { comment: CommentWithUser; postId: string
               alt={comment.user.username}
               width={36}
               height={36}
-              className="h-9 w-9 rounded-xl object-cover ring-1 ring-zinc-200"
+              className="h-9 w-9 rounded-xl object-cover ring-1 ring-zinc-200 dark:ring-slate-700"
             />
           )}
           <div>
-            <span className="text-sm font-bold text-zinc-900 capitalize block">{comment.user.username}</span>
-            <span className="text-[11px] text-zinc-400 font-medium">
+            <span className="text-sm font-bold text-zinc-900 dark:text-white capitalize block">{comment.user.username}</span>
+            <span suppressHydrationWarning className="text-[11px] text-zinc-400 dark:text-slate-500 font-medium">
               {formatTimeAgo(comment.createdAt)}
             </span>
           </div>
@@ -57,7 +57,7 @@ const Comment = ({ comment, postId }: { comment: CommentWithUser; postId: string
         {user && (comment.user.username === user.username || role === "admin") && (
           <button
             type="button"
-            className="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors p-1 cursor-pointer"
+            className="text-xs font-semibold text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors p-1 cursor-pointer"
             onClick={() => deleteCommentMutation.mutate()}
             disabled={deleteCommentMutation.isPending}
           >
@@ -66,7 +66,7 @@ const Comment = ({ comment, postId }: { comment: CommentWithUser; postId: string
         )}
       </div>
 
-      <div className="text-sm leading-relaxed text-zinc-700 whitespace-pre-wrap pl-1">
+      <div className="text-sm leading-relaxed text-zinc-700 dark:text-slate-300 whitespace-pre-wrap pl-1">
         {comment.desc}
       </div>
     </div>

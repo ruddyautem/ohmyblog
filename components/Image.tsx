@@ -8,17 +8,34 @@ export interface ImageProps {
   alt?: string;
   description?: string;
   priority?: boolean;
+  unoptimized?: boolean;
+  sizes?: string;
 }
 
-const Image = ({ src, className, w, h, alt, description, priority = false }: ImageProps) => {
+const Image = ({
+  src,
+  className,
+  w,
+  h,
+  alt,
+  description,
+  priority = false,
+  unoptimized,
+  sizes,
+}: ImageProps) => {
   if (!src) return null;
 
   const isExternal = src.startsWith("http://") || src.startsWith("https://");
+  const isSvg =
+    src.toLowerCase().endsWith(".svg") ||
+    src.includes(".svg?") ||
+    src.startsWith("data:image/svg");
+
   const isLocalStatic =
     src === "/logo.png" ||
     src === "/profile.png" ||
     src === "/favicon.ico" ||
-    src.endsWith(".svg") ||
+    isSvg ||
     src.startsWith("/icons/");
 
   if (isLocalStatic) {
@@ -29,7 +46,7 @@ const Image = ({ src, className, w, h, alt, description, priority = false }: Ima
         width={w ? Number(w) : 100}
         height={h ? Number(h) : 100}
         className={className}
-        unoptimized
+        unoptimized={unoptimized ?? isSvg}
       />
     );
   }
@@ -53,7 +70,8 @@ const Image = ({ src, className, w, h, alt, description, priority = false }: Ima
       height={height}
       priority={priority}
       className={className}
-      unoptimized
+      unoptimized={unoptimized ?? isSvg}
+      sizes={sizes}
     />
   );
 };

@@ -5,6 +5,8 @@ import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useUser, UserButton, useClerk } from "@clerk/nextjs";
 import Search from "./Search";
 import Image from "next/image";
+import { ThemeToggle, useTheme } from "./ThemeProvider";
+import { dark } from "@clerk/themes";
 
 const categoryLinks = [
   { label: "Voyages", path: "/posts?cat=voyages", cat: "voyages" },
@@ -137,16 +139,18 @@ const NavSelectorsContent = () => {
         closeDropdown();
       }}
     >
-      <div className='relative flex items-center rounded-full bg-zinc-100/90 p-1 border border-zinc-200/60 shadow-2xs'>
+      <div className='relative flex items-center rounded-full bg-zinc-100/90 dark:bg-[#121826] p-1 border border-zinc-200/60 dark:border-slate-800 shadow-2xs'>
         {/* Tous les posts Dropdown Trigger Button (No pill on top hover, dynamic label) */}
         <button
           type='button'
           onMouseEnter={openDropdown}
           onClick={() => setDropdownOpen((prev) => !prev)}
+          aria-haspopup="true"
+          aria-expanded={dropdownOpen}
           className={`cursor-pointer inline-flex items-center gap-1.5 justify-center rounded-full px-3.5 py-1.5 text-xs lg:text-sm font-medium whitespace-nowrap transition-colors duration-150 ${
             dropdownOpen || (pathname === "/posts" && !currentCat)
-              ? "text-zinc-950 font-semibold"
-              : "text-zinc-600 hover:text-zinc-950"
+              ? "text-zinc-950 dark:text-white font-semibold"
+              : "text-zinc-600 dark:text-slate-400 hover:text-zinc-950 dark:hover:text-white"
           }`}
         >
           <span>{dropdownTriggerLabel}</span>
@@ -160,14 +164,14 @@ const NavSelectorsContent = () => {
           </svg>
         </button>
 
-        {/* Categories Bar with Solid Black Smooth Sliding Pill */}
+        {/* Categories Bar with Solid Smooth Sliding Pill */}
         <nav
           onMouseLeave={handleTopMouseLeave}
           className='relative flex items-center'
         >
-          {/* Solid Black Smooth Sliding Pill for the 4 Categories */}
+          {/* Solid Smooth Sliding Pill for the 4 Categories */}
           <span
-            className='pointer-events-none absolute top-0 bottom-0 rounded-full bg-zinc-900 shadow-xs transition-all duration-300 ease-out'
+            className='pointer-events-none absolute top-0 bottom-0 rounded-full bg-zinc-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 shadow-xs dark:shadow-[0_0_14px_rgba(99,102,241,0.4)] transition-all duration-300 ease-out'
             style={{
               transform: `translateX(${pillStyle.left}px)`,
               width: `${pillStyle.width}px`,
@@ -190,7 +194,7 @@ const NavSelectorsContent = () => {
                 className={`relative z-10 inline-flex items-center gap-1.5 justify-center rounded-full px-3.5 py-1.5 text-xs lg:text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
                   isTargeted
                     ? "text-white font-semibold"
-                    : "text-zinc-600 hover:text-zinc-950"
+                    : "text-zinc-600 dark:text-slate-400 hover:text-zinc-950 dark:hover:text-white"
                 }`}
               >
                 {link.label}
@@ -200,7 +204,7 @@ const NavSelectorsContent = () => {
         </nav>
       </div>
 
-      {/* Dropdown Menu with Slide-down Animation and Inner Sliding Black Pill */}
+      {/* Dropdown Menu with Slide-down Animation and Inner Sliding Pill */}
       {dropdownOpen && (
         <div
           onMouseEnter={openDropdown}
@@ -209,11 +213,11 @@ const NavSelectorsContent = () => {
         >
           <div
             onMouseLeave={() => setDropdownHoverIndex(null)}
-            className='relative flex flex-col gap-1 rounded-2xl border border-zinc-200/90 bg-white/98 p-1.5 shadow-2xl ring-1 ring-black/5 backdrop-blur-md'
+            className='relative flex flex-col gap-1 rounded-2xl border border-zinc-200/90 dark:border-slate-800 bg-white/98 dark:bg-[#121826]/95 p-1.5 shadow-2xl dark:shadow-[0_12px_40px_rgba(0,0,0,0.6)] ring-1 ring-black/5 dark:ring-slate-700/50 backdrop-blur-md'
           >
-            {/* Smooth Sliding Black Pill Indicator inside Dropdown */}
+            {/* Smooth Sliding Pill Indicator inside Dropdown */}
             <span
-              className='pointer-events-none absolute left-1.5 right-1.5 rounded-xl bg-zinc-900 shadow-sm transition-all duration-200 ease-out'
+              className='pointer-events-none absolute left-1.5 right-1.5 rounded-xl bg-zinc-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 shadow-sm dark:shadow-[0_0_12px_rgba(99,102,241,0.35)] transition-all duration-200 ease-out'
               style={{
                 transform: `translateY(${dropdownPillStyle.top}px)`,
                 height: `${dropdownPillStyle.height}px`,
@@ -239,12 +243,12 @@ const NavSelectorsContent = () => {
                   className={`relative z-10 flex items-center justify-between rounded-xl px-3.5 py-2.5 transition-colors duration-150 ${
                     isTargeted
                       ? "text-white font-semibold"
-                      : "text-zinc-700 hover:text-zinc-950"
+                      : "text-zinc-700 dark:text-slate-300 hover:text-zinc-950 dark:hover:text-white"
                   }`}
                 >
                   <div className='flex flex-col text-left'>
                     <span className='text-sm font-semibold leading-snug'>{opt.label}</span>
-                    <span className={`text-[11px] leading-tight mt-0.5 ${isTargeted ? "text-zinc-300" : "text-zinc-400"}`}>
+                    <span className={`text-[11px] leading-tight mt-0.5 ${isTargeted ? "text-indigo-100" : "text-zinc-400 dark:text-slate-400"}`}>
                       {opt.desc}
                     </span>
                   </div>
@@ -294,8 +298,8 @@ const MobileNavSelectorsContent = ({ setOpen }: { setOpen: (v: boolean) => void 
           onClick={() => setOpen(false)}
           className={`rounded-xl px-4 py-3 text-base font-medium transition-colors ${
             link.active
-              ? "bg-zinc-900 text-white font-semibold shadow-xs"
-              : "bg-zinc-50 text-zinc-800 hover:bg-zinc-100"
+              ? "bg-zinc-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 text-white font-semibold shadow-xs"
+              : "bg-zinc-50 dark:bg-[#121826] text-zinc-800 dark:text-slate-200 hover:bg-zinc-100 dark:hover:bg-[#182032] border border-transparent dark:border-slate-800/60"
           }`}
         >
           {link.label}
@@ -307,7 +311,7 @@ const MobileNavSelectorsContent = ({ setOpen }: { setOpen: (v: boolean) => void 
 
 const MobileNavSelectors = ({ setOpen }: { setOpen: (v: boolean) => void }) => {
   return (
-    <Suspense fallback={<div className="h-40 rounded-xl bg-zinc-100 animate-pulse"></div>}>
+    <Suspense fallback={<div className="h-40 rounded-xl bg-zinc-100 dark:bg-[#121826] animate-pulse"></div>}>
       <MobileNavSelectorsContent setOpen={setOpen} />
     </Suspense>
   );
@@ -317,25 +321,24 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { isSignedIn } = useUser();
   const { openUserProfile, signOut } = useClerk();
+  const { theme } = useTheme();
 
   return (
-    <header className='sticky top-0 z-50 w-full border-b border-zinc-100 bg-white/80 backdrop-blur-md transition-all'>
+    <header className='sticky top-0 z-50 w-full border-b border-zinc-100 dark:border-slate-800/80 bg-white/80 dark:bg-[#0b0f17]/85 backdrop-blur-md transition-all'>
       <div className='mx-auto flex h-16 md:h-20 max-w-7xl 2xl:max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8 gap-4'>
-        {/* Logo */}
+        {/* Logo - pure original with dark:invert */}
         <Link
           href='/'
           className='group flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-90 shrink-0'
         >
-          <div className='relative overflow-hidden rounded-lg shadow-sm ring-1 ring-zinc-900/10'>
-            <Image
-              src='/logo.png'
-              alt='OhMyBlog Logo'
-              width={36}
-              height={36}
-              className='h-9 w-9 object-contain'
-            />
-          </div>
-          <span className='text-xl font-bold tracking-tight text-zinc-900 md:text-2xl'>
+          <Image
+            src='/logo.png'
+            alt='OhMyBlog Logo'
+            width={36}
+            height={36}
+            className='h-9 w-9 object-contain dark:invert transition-all'
+          />
+          <span className='text-xl font-bold tracking-tight text-zinc-900 dark:text-white md:text-2xl group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors'>
             OhMyBlog!
           </span>
         </Link>
@@ -348,28 +351,41 @@ const Navbar = () => {
 
           <NavSelectors />
 
+          <ThemeToggle />
+
+          {/* Modern Dark Write Button with Glowing Badge */}
           <Link
             href='/write'
-            className='inline-flex items-center justify-center gap-1.5 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-zinc-800 hover:shadow-md shrink-0'
+            className='group inline-flex items-center justify-center gap-2 rounded-full bg-zinc-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:via-indigo-500 dark:to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 dark:hover:from-indigo-500 dark:hover:to-blue-500 dark:shadow-[0_0_22px_rgba(99,102,241,0.45)] dark:border dark:border-indigo-400/30 hover:scale-[1.02] active:scale-[0.98] shrink-0'
           >
-            <span>✍️ Écrire</span>
+            <span className='flex h-6 w-6 items-center justify-center rounded-full bg-zinc-800 dark:bg-white/20 text-xs shadow-inner dark:shadow-[0_0_10px_rgba(255,255,255,0.25)] transition-transform group-hover:rotate-12'>✍️</span>
+            <span>Écrire</span>
           </Link>
 
           {!isSignedIn ? (
-            <Link href='/sign-in' className='shrink-0'>
-              <button className='inline-flex items-center justify-center rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 transition-all hover:border-zinc-900 hover:bg-zinc-900 hover:text-white cursor-pointer'>
-                Se connecter
-              </button>
+            <Link
+              href='/sign-in'
+              className='shrink-0 inline-flex items-center justify-center rounded-full border border-zinc-300 dark:border-slate-700 bg-transparent dark:bg-[#121826] px-4 py-2 text-sm font-medium text-zinc-800 dark:text-slate-200 transition-all hover:border-zinc-900 dark:hover:border-indigo-500 hover:bg-zinc-900 dark:hover:bg-indigo-600 hover:text-white cursor-pointer'
+            >
+              Se connecter
             </Link>
           ) : (
             <div className='ml-1 flex items-center shrink-0'>
               <UserButton
                 appearance={{
+                  theme: theme === "dark" ? dark : undefined,
+                  variables: theme === "dark" ? {
+                    colorBackground: "#121826",
+                    colorForeground: "#f8fafc",
+                    colorMutedForeground: "#94a3b8",
+                  } : undefined,
                   elements: {
                     userButtonAvatarBox:
-                      "h-9 w-9 !rounded-lg ring-1 ring-zinc-200",
+                      "h-9 w-9 !rounded-lg ring-1 ring-zinc-200 dark:ring-slate-700",
                     avatarImage: "!rounded-lg",
                     avatarBox: "!rounded-lg",
+                    userButtonPopoverCard:
+                      "border border-zinc-200 dark:border-slate-800 bg-white dark:bg-[#121826] shadow-xl",
                   },
                 }}
               />
@@ -377,20 +393,23 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Menu Toggle Button */}
-        <div className='flex items-center gap-3 lg:hidden'>
+        {/* Mobile Menu Actions */}
+        <div className='flex items-center gap-2.5 lg:hidden'>
+          <ThemeToggle />
+
           <button
             type='button'
-            className='cursor-pointer flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-700 transition-colors hover:bg-zinc-100'
+            className='cursor-pointer flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 dark:border-slate-800 bg-white dark:bg-[#121826] text-zinc-700 dark:text-slate-300 transition-colors hover:bg-zinc-100 dark:hover:bg-[#182032]'
             onClick={() => setOpen((prev) => !prev)}
             aria-label='Toggle menu'
+            aria-expanded={open}
           >
             <Image
               width={20}
               height={20}
               src={open ? "/close.svg" : "/burger.svg"}
               alt={open ? "Fermer" : "Menu"}
-              className='h-5 w-5 object-contain'
+              className='h-5 w-5 object-contain dark:invert'
             />
           </button>
         </div>
@@ -398,7 +417,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Drawer */}
       {open && (
-        <div className='fixed inset-x-0 top-16 z-50 flex h-[calc(100vh-4rem)] flex-col justify-between border-t border-zinc-100 bg-white p-6 lg:hidden animate-in fade-in slide-in-from-top-4 duration-200'>
+        <div className='fixed inset-x-0 top-16 z-50 flex h-[calc(100vh-4rem)] flex-col justify-between border-t border-zinc-100 dark:border-slate-800 bg-white dark:bg-[#0b0f17] p-6 lg:hidden animate-in fade-in slide-in-from-top-4 duration-200'>
           <div className='flex flex-col gap-4'>
             <Suspense fallback='...'>
               <Search onSubmit={() => setOpen(false)} />
@@ -407,10 +426,10 @@ const Navbar = () => {
             <MobileNavSelectors setOpen={setOpen} />
           </div>
 
-          <div className='pt-6 border-t border-zinc-100'>
+          <div className='pt-6 border-t border-zinc-100 dark:border-slate-800'>
             {!isSignedIn ? (
               <Link href='/sign-in' onClick={() => setOpen(false)}>
-                <button className='w-full rounded-xl bg-zinc-900 py-3 text-center text-base font-semibold text-white transition-colors hover:bg-zinc-800 shadow-sm cursor-pointer'>
+                <button className='w-full rounded-xl bg-zinc-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 py-3 text-center text-base font-semibold text-white transition-colors hover:bg-zinc-800 dark:hover:from-indigo-500 dark:hover:to-blue-500 shadow-sm cursor-pointer'>
                   Se connecter
                 </button>
               </Link>
@@ -422,7 +441,7 @@ const Navbar = () => {
                     setOpen(false);
                     openUserProfile();
                   }}
-                  className='flex w-full items-center justify-center rounded-xl bg-black px-4 py-3 text-base font-semibold text-white transition-colors shadow-sm text-center cursor-pointer'
+                  className='flex w-full items-center justify-center rounded-xl bg-zinc-900 dark:bg-[#182032] border border-transparent dark:border-slate-700 px-4 py-3 text-base font-semibold text-white dark:text-slate-200 transition-colors shadow-sm text-center cursor-pointer hover:dark:bg-[#1e293b]'
                 >
                   <span>Gérer mon compte</span>
                 </button>
@@ -432,7 +451,7 @@ const Navbar = () => {
                     setOpen(false);
                     signOut();
                   }}
-                  className='w-full rounded-xl bg-red-500 py-3 text-center text-base font-semibold text-white transition-colors  hover:text-white cursor-pointer'
+                  className='w-full rounded-xl bg-red-500 py-3 text-center text-base font-semibold text-white transition-colors hover:bg-red-600 cursor-pointer'
                 >
                   Se déconnecter
                 </button>

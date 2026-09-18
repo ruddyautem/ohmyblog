@@ -65,6 +65,8 @@ const PostMenuAction = ({ post }: { post: PostWithUser }) => {
     }
   });
 
+  const isQueryLoading = isClerkReady && !!user && isPending;
+
   const handleSave = () => {
     if (!user) return router.push("/sign-in");
     saveMutation.mutate();
@@ -82,44 +84,57 @@ const PostMenuAction = ({ post }: { post: PostWithUser }) => {
 
   if (!isClerkReady) {
     return (
-      <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs">
-        <div className="h-20 bg-zinc-100 rounded-2xl animate-pulse"></div>
+      <div className="rounded-3xl border border-zinc-200/80 dark:border-slate-800 bg-white dark:bg-[#121826] p-6 shadow-xs">
+        <div className="h-20 bg-zinc-100 dark:bg-[#182032] rounded-2xl animate-pulse"></div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs space-y-3">
-      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Actions</h3>
+    <div className="rounded-3xl border border-zinc-200/80 dark:border-slate-800 bg-white dark:bg-[#121826] p-6 shadow-xs space-y-3">
+      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-slate-500">Actions</h3>
 
       <div className="flex flex-col gap-1.5">
-        {isPending ? (
-          <div className="flex items-center gap-2 py-2 text-xs text-zinc-400">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900"></span>
+        {isQueryLoading ? (
+          <div className="flex items-center gap-2 py-2 text-xs text-zinc-400 dark:text-slate-500">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 dark:border-slate-700 border-t-zinc-900 dark:border-t-indigo-500"></span>
             <span>Chargement des actions...</span>
           </div>
-        ) : error ? (
-          <div className="py-2 text-xs text-red-500">Erreur de chargement</div>
+        ) : error && !!user ? (
+          <div className="py-2 text-xs text-red-500 dark:text-red-400">Erreur de chargement</div>
         ) : (
           <button
             type="button"
-            className="flex w-full cursor-pointer items-center gap-3 rounded-2xl p-2.5 text-sm font-medium text-zinc-700 transition-all hover:bg-zinc-100 hover:text-zinc-900"
+            className={`flex w-full cursor-pointer items-center rounded-2xl p-2.5 text-sm transition-all ${
+              !user
+                ? "bg-zinc-100 dark:bg-[#182032] border border-zinc-200/80 dark:border-slate-700 font-bold text-zinc-900 dark:text-white hover:bg-zinc-200 dark:hover:bg-[#1e293b] justify-center text-center shadow-2xs"
+                : "gap-3 font-medium text-zinc-700 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-[#182032] hover:text-zinc-900 dark:hover:text-white"
+            }`}
             onClick={handleSave}
           >
-            <Image
-              src={isSaved ? "/bookmark-saved.svg" : "/bookmark-unsaved.svg"}
-              alt={isSaved ? "Saved" : "Not saved"}
-              width={18}
-              height={18}
-            />
-            <span>{isSaved ? "Retirer des favoris" : "Ajouter aux favoris"}</span>
+            {user && (
+              <Image
+                src={isSaved ? "/bookmark-saved.svg" : "/bookmark-unsaved.svg"}
+                alt={isSaved ? "Saved" : "Not saved"}
+                width={18}
+                height={18}
+                className="dark:invert"
+              />
+            )}
+            <span className={!user ? "font-bold" : ""}>
+              {!user
+                ? "Se connecter pour ajouter aux favoris"
+                : isSaved
+                ? "Retirer des favoris"
+                : "Ajouter aux favoris"}
+            </span>
           </button>
         )}
 
         {isAdmin && (
           <button
             type="button"
-            className="flex w-full cursor-pointer items-center gap-3 rounded-2xl p-2.5 text-sm font-medium text-zinc-700 transition-all hover:bg-zinc-100 hover:text-zinc-900"
+            className="flex w-full cursor-pointer items-center gap-3 rounded-2xl p-2.5 text-sm font-medium text-zinc-700 dark:text-slate-300 transition-all hover:bg-zinc-100 dark:hover:bg-[#182032] hover:text-zinc-900 dark:hover:text-white"
             onClick={handleFeature}
           >
             <Image
@@ -127,6 +142,7 @@ const PostMenuAction = ({ post }: { post: PostWithUser }) => {
               alt="Feature"
               width={18}
               height={18}
+              className="dark:invert"
             />
             <span>{post.isFeatured ? "Retirer de la une" : "Mettre à la une"}</span>
           </button>
@@ -135,7 +151,7 @@ const PostMenuAction = ({ post }: { post: PostWithUser }) => {
         {user && (post.user?.username === user.username || isAdmin) && (
           <button
             type="button"
-            className="flex w-full cursor-pointer items-center gap-3 rounded-2xl p-2.5 text-sm font-medium text-red-500 transition-all hover:bg-red-50 hover:text-red-600"
+            className="flex w-full cursor-pointer items-center gap-3 rounded-2xl p-2.5 text-sm font-medium text-red-500 dark:text-red-400 transition-all hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-300"
             onClick={handleDelete}
           >
             <Image src="/trash.svg" alt="Delete" width={18} height={18} />

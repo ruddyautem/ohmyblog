@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-display: "Montserrat", sans-serif;
 }
@@ -10,6 +12,11 @@ html {
 
 ::selection {
   background-color: #18181b;
+  color: #ffffff;
+}
+
+.dark ::selection {
+  background-color: #4f46e5;
   color: #ffffff;
 }
 
@@ -27,11 +34,24 @@ html {
   background: #f4f4f5;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #0b0f17;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #d4d4d8;
   border-radius: 4px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1aa;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #334155;
 }

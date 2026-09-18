@@ -11,15 +11,15 @@ const PostListItem = ({ post }: { post: PostWithUser }) => {
   return (
     <Link
       href={`/${post.slug}`}
-      className="group relative mb-6 flex flex-col gap-6 rounded-3xl border border-zinc-200/80 bg-white p-5 sm:p-6 shadow-xs transition-colors duration-200 hover:border-zinc-300 hover:shadow-md md:flex-row cursor-pointer"
+      className="group relative mb-4 sm:mb-6 flex flex-col gap-4 sm:gap-6 rounded-2xl sm:rounded-3xl border border-zinc-200/80 dark:border-slate-800 bg-white dark:bg-[#121826] p-4 sm:p-6 shadow-xs transition-all duration-200 hover:border-zinc-300 dark:hover:border-indigo-500/40 hover:shadow-md dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)] md:flex-row cursor-pointer"
     >
       {/* Article Cover Image */}
       {post.img && (
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-zinc-100 md:w-5/12">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-zinc-100 dark:bg-[#182032] md:w-5/12">
           <Image
             src={post.img}
             alt={post.title}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
             w="735"
           />
         </div>
@@ -29,14 +29,14 @@ const PostListItem = ({ post }: { post: PostWithUser }) => {
       <div className="flex flex-1 flex-col justify-between py-1">
         <div>
           {/* Metadata Row */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-slate-400">
             {post.user && (
               <div className="flex items-center gap-2">
                 {post.user.img && (
                   <Image
                     src={post.user.img}
                     alt={post.user.username}
-                    className="h-5 w-5 rounded-full object-cover ring-1 ring-zinc-200"
+                    className="h-5 w-5 rounded-full object-cover ring-1 ring-zinc-200 dark:ring-slate-700"
                     w="20"
                     h="20"
                   />
@@ -49,7 +49,14 @@ const PostListItem = ({ post }: { post: PostWithUser }) => {
                     e.stopPropagation();
                     router.push(`/posts?author=${post.user?.username}`);
                   }}
-                  className="font-semibold text-zinc-800 capitalize hover:text-zinc-950 transition-colors"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      router.push(`/posts?author=${post.user?.username}`);
+                    }
+                  }}
+                  className="font-semibold text-zinc-800 dark:text-slate-200 capitalize hover:text-zinc-950 dark:hover:text-indigo-400 transition-colors"
                 >
                   {post.user.username}
                 </span>
@@ -64,33 +71,40 @@ const PostListItem = ({ post }: { post: PostWithUser }) => {
                 e.stopPropagation();
                 router.push(`/posts?cat=${post.category}`);
               }}
-              className="rounded-full bg-zinc-100 px-2.5 py-0.5 font-semibold text-zinc-800 capitalize transition-colors hover:bg-zinc-900 hover:text-white"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push(`/posts?cat=${post.category}`);
+                }
+              }}
+              className="rounded-full bg-zinc-100 dark:bg-indigo-500/15 border border-transparent dark:border-indigo-500/20 px-2.5 py-0.5 font-semibold text-zinc-800 dark:text-indigo-300 capitalize transition-colors hover:bg-zinc-900 dark:hover:bg-indigo-600 hover:text-white dark:hover:text-white"
             >
               {post.category}
             </span>
             <span>•</span>
-            <span>{formatTimeAgo(post.createdAt)}</span>
+            <span suppressHydrationWarning>{formatTimeAgo(post.createdAt)}</span>
           </div>
 
           {/* Title */}
-          <h2 className="mt-3 text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 transition-colors group-hover:text-zinc-700">
+          <h2 className="mt-2.5 sm:mt-3 text-lg sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white transition-colors group-hover:text-zinc-700 dark:group-hover:text-indigo-300 leading-snug">
             {post.title}
           </h2>
 
           {/* Description */}
           {post.desc && (
-            <p className="mt-2 text-sm leading-relaxed text-zinc-600 line-clamp-3">
+            <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm leading-relaxed text-zinc-600 dark:text-slate-400 line-clamp-2 sm:line-clamp-3">
               {post.desc}
             </p>
           )}
         </div>
 
         {/* Footer info & Read Link */}
-        <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-4">
-          <span className="text-xs text-zinc-400 font-medium">
+        <div className="mt-4 sm:mt-5 flex items-center justify-between border-t border-zinc-100 dark:border-slate-800 pt-3 sm:pt-4">
+          <span className="text-xs text-zinc-400 dark:text-slate-500 font-medium">
             {(post.visit ?? 0)} vue{(post.visit ?? 0) > 1 ? "s" : ""}
           </span>
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-zinc-900 group-hover:text-zinc-600 transition-colors">
+          <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-zinc-900 dark:text-indigo-400 group-hover:text-zinc-600 dark:group-hover:text-indigo-300 transition-colors">
             <span>Lire le post</span>
             <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
           </span>

@@ -45,19 +45,19 @@ const PostListHeaderContent = ({ open, setOpen }: { open: boolean; setOpen: Reac
   }
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-100 pb-6">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-100 dark:border-slate-800 pb-4 sm:pb-6">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white md:text-4xl">
           {title}
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-xs sm:text-sm text-zinc-500 dark:text-slate-400">
           {subtitle}
         </p>
       </div>
 
       <button
         type="button"
-        className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-800 shadow-xs transition-colors hover:bg-zinc-50 md:hidden"
+        className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-zinc-200 dark:border-slate-700 bg-white dark:bg-[#121826] px-4 py-2.5 text-sm font-semibold text-zinc-800 dark:text-slate-200 shadow-xs transition-colors hover:bg-zinc-50 dark:hover:bg-[#182032] md:hidden cursor-pointer"
         onClick={() => setOpen((prev) => !prev)}
       >
         <span>{open ? "✕ Fermer les filtres" : "🔍 Filtrer & Rechercher"}</span>
@@ -70,21 +70,21 @@ const PostListPage = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 mb-12 sm:mb-6">
       {/* Dynamic Page Header */}
-      <Suspense fallback={<div className="h-20 border-b border-zinc-100 pb-6 animate-pulse bg-zinc-50 rounded-2xl"></div>}>
+      <Suspense fallback={<div className="h-20 border-b border-zinc-100 dark:border-slate-800 pb-6 animate-pulse bg-zinc-50 dark:bg-[#121826] rounded-2xl"></div>}>
         <PostListHeaderContent open={open} setOpen={setOpen} />
       </Suspense>
 
       {/* Main Grid: Feed + Sidebar */}
-      <div className="flex flex-col-reverse gap-8 md:flex-row md:items-start">
+      <div className="flex flex-col-reverse gap-8 md:flex-row md:items-start pb-8 lg:pb-0">
         <div className="w-full md:w-2/3 lg:w-3/4">
-          <Suspense fallback={<div className="py-12 text-center text-zinc-400">Chargement des posts...</div>}>
+          <Suspense fallback={<div className="py-12 text-center text-zinc-400 dark:text-slate-500">Chargement des posts...</div>}>
             <PostList />
           </Suspense>
         </div>
         <div className={`${open ? "block" : "hidden"} w-full md:block md:w-1/3 lg:w-1/4`}>
-          <Suspense fallback={<div className="py-12 text-center text-zinc-400">Chargement des filtres...</div>}>
+          <Suspense fallback={<div className="py-12 text-center text-zinc-400 dark:text-slate-500">Chargement des filtres...</div>}>
             <SideMenu />
           </Suspense>
         </div>

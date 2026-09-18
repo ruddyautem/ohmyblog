@@ -44,16 +44,16 @@ const SideMenu = () => {
   return (
     <aside className='sticky top-24 space-y-6'>
       {/* Search Card */}
-      <div className='rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs'>
-        <h3 className='mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400'>
+      <div className='rounded-3xl border border-zinc-200/80 dark:border-slate-800 bg-white dark:bg-[#121826] p-5 shadow-xs'>
+        <h3 className='mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-slate-500'>
           Rechercher
         </h3>
-        <Search />
+        <Search className="w-full h-9.5" />
       </div>
 
       {/* Sort Filters Card */}
-      <div className='rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs'>
-        <h3 className='mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400'>
+      <div className='rounded-3xl border border-zinc-200/80 dark:border-slate-800 bg-white dark:bg-[#121826] p-5 shadow-xs'>
+        <h3 className='mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-slate-500'>
           Trier par
         </h3>
         <div className='flex flex-col gap-1.5'>
@@ -64,14 +64,15 @@ const SideMenu = () => {
                 key={opt.value}
                 type='button'
                 onClick={() => handleFilterChange(opt.value)}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition-all  cursor-pointer ${
+                aria-pressed={isSelected}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-zinc-900 text-white shadow-xs"
-                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                    ? "bg-zinc-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 text-white shadow-xs"
+                    : "text-zinc-600 dark:text-slate-400 hover:bg-zinc-100 dark:hover:bg-[#182032] hover:text-zinc-900 dark:hover:text-white"
                 }`}
               >
                 <span>{opt.label}</span>
-                {isSelected && <span className='text-xs'>✓</span>}
+                {isSelected && <span className='text-xs font-bold'>✓</span>}
               </button>
             );
           })}
@@ -79,8 +80,8 @@ const SideMenu = () => {
       </div>
 
       {/* Categories Card */}
-      <div className='rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs'>
-        <h3 className='mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400 '>
+      <div className='rounded-3xl border border-zinc-200/80 dark:border-slate-800 bg-white dark:bg-[#121826] p-5 shadow-xs'>
+        <h3 className='mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-slate-500'>
           Catégories
         </h3>
         <div className='flex flex-wrap gap-2'>
@@ -93,10 +94,11 @@ const SideMenu = () => {
                 key={cat.value}
                 type='button'
                 onClick={() => handleCategoryChange(cat.value)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all  cursor-pointer ${
+                aria-pressed={isSelected}
+                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-zinc-900 text-white shadow-xs ring-1 ring-zinc-900"
-                    : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900"
+                    ? "bg-zinc-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 text-white shadow-xs ring-1 ring-zinc-900 dark:ring-indigo-500/50"
+                    : "bg-zinc-100 dark:bg-[#182032] text-zinc-700 dark:text-slate-300 hover:bg-zinc-200 dark:hover:bg-[#1e293b] hover:text-zinc-900 dark:hover:text-white border border-transparent dark:border-slate-800/60"
                 }`}
               >
                 {cat.label}
