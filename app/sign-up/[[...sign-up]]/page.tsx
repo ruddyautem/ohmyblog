@@ -14,8 +14,8 @@ export default function SignUpPage() {
     <div className="relative flex flex-col items-center justify-center py-4 sm:py-8 lg:min-h-[calc(100vh-14rem)]">
       {/* Ambient background glow in dark mode */}
       <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center overflow-hidden">
-        <div className="h-[360px] w-[360px] rounded-full bg-indigo-500/10 blur-[100px] dark:bg-indigo-600/15" />
-        <div className="h-[280px] w-[280px] -translate-y-16 translate-x-24 rounded-full bg-blue-500/10 blur-[90px] dark:bg-blue-600/10" />
+        <div className="h-90 w-90 rounded-full bg-indigo-500/10 blur-[100px] dark:bg-indigo-600/15" />
+        <div className="h-70 w-70 -translate-y-16 translate-x-24 rounded-full bg-blue-500/10 dark:bg-blue-600/10" />
       </div>
 
       {/* Brand Header */}

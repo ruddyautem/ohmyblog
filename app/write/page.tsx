@@ -136,7 +136,7 @@ const Write = () => {
     content: '<p>Rédigez votre récit ici...</p>',
     editorProps: {
       attributes: {
-        class: 'focus:outline-none min-h-[450px] p-6 text-zinc-800 dark:text-slate-100 leading-relaxed text-base sm:text-lg [&_img]:max-w-full [&_img]:my-6 [&_img]:rounded-2xl [&_img]:shadow-sm [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-3 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_ul]:list-disc [&_ul]:ml-6 [&_p]:mb-4 [&_blockquote]:border-l-4 [&_blockquote]:border-zinc-900 dark:[&_blockquote]:border-indigo-500',
+        class: 'focus:outline-none min-h-112.5 p-6 text-zinc-800 dark:text-slate-100 leading-relaxed text-base sm:text-lg [&_img]:max-w-full [&_img]:my-6 [&_img]:rounded-2xl [&_img]:shadow-sm [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-3 [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_ul]:list-disc [&_ul]:ml-6 [&_p]:mb-4 [&_blockquote]:border-l-4 [&_blockquote]:border-zinc-900 dark:[&_blockquote]:border-indigo-500',
       },
     },
   });
