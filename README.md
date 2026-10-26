@@ -351,3 +351,9 @@ Then visit [http://localhost:3000](http://localhost:3000).
 > NEXT_PUBLIC_R2_PUBLIC_URL=https://pub-...r2.dev
 > NEXT_PUBLIC_APP_URL=http://localhost:3000
 > ```
+### Correctifs et préparation
+
+Exécuter `bun run db:setup` explicitement avec un compte de migration pour une nouvelle base ; les requêtes web ne créent plus de tables. Les nouveaux médias utilisent un préfixe propriétaire `users/<id>/`. Les anciens fichiers sans propriétaire démontrable sont conservés pour éviter une suppression abusive. Uploads : images matricielles et vidéos MP4/WebM, 5 Mo maximum, taille et type signés. Les SVG actifs doivent être convertis en image matricielle. Tester la politique CORS R2 (PUT, Content-Type) en staging.
+
+
+Validation locale : bun run test, bunx tsc --noEmit, bun run lint et bun run build. Les tests couvrent les frontières de propriété des assets, le JSON-LD, la sanitisation et les en-têtes signés des uploads. Ils ne téléversent rien. Vérifier en bucket de test qu’un PUT de taille différente est réellement refusé par R2 et que CORS autorise le navigateur à envoyer Content-Type ; Content-Length est fixé automatiquement par le navigateur. Le rattachement d’un compte retrouvé par email exige maintenant un email principal vérifié par Clerk. Les anciens embeds vidéo R2 MP4/WebM sont convertis en balises video ; les iframes arbitraires sont supprimées.

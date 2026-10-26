@@ -65,7 +65,8 @@ export async function POST(req: Request) {
 
     if (eventType === "user.created" || eventType === "user.updated") {
       const userData = evt.data;
-      const email = userData.email_addresses?.[0]?.email_address || "";
+      const primaryEmail = userData.email_addresses?.find(address => address.id === userData.primary_email_address_id) || userData.email_addresses?.[0];
+      const email = primaryEmail?.email_address || "";
       const baseUsername = userData.username || email.split("@")[0] || `user_${userData.id.slice(-8)}`;
       const img = userData.image_url || null;
 
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
       });
 
       // If not found by clerkUserId, check by email (handles re-registration with same email)
-      if (!existingUser && email) {
+      if (!existingUser && email && primaryEmail?.verification?.status === "verified") {
         existingUser = await db.query.users.findFirst({
           where: eq(users.email, email),
         });
@@ -124,57 +125,10 @@ export async function POST(req: Request) {
         console.log(`[Clerk Webhook] Processing deletion for clerkUserId: ${id}`);
         const existingUser = await db.query.users.findFirst({
           where: eq(users.clerkUserId, id),
-          with: {
-            posts: true,
-          },
         });
 
         if (existingUser) {
-          try {
-            const { DeleteObjectsCommand } = await import("@aws-sdk/client-s3");
-            const { r2Client } = await import("@/lib/r2");
-            const bucket = process.env.R2_BUCKET_NAME || "ohmyblog-uploads";
-            const publicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://pub-dc8f3ebfad6f443b920c49b37078af5c.r2.dev";
-            const keysToDelete: Set<string> = new Set();
-
-            if (existingUser.img && existingUser.img.includes(publicUrl)) {
-              const key = existingUser.img.replace(`${publicUrl}/`, "");
-              if (key) keysToDelete.add(key);
-            }
-
-            if (existingUser.posts && existingUser.posts.length > 0) {
-              for (const post of existingUser.posts) {
-                if (post.img && post.img.includes(publicUrl)) {
-                  const key = post.img.replace(`${publicUrl}/`, "");
-                  if (key) keysToDelete.add(key);
-                }
-
-                if (post.content) {
-                  const urlPattern = new RegExp(`${publicUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/([^\\s"'<>]+)`, "g");
-                  let match;
-                  while ((match = urlPattern.exec(post.content)) !== null) {
-                    if (match[1]) keysToDelete.add(match[1]);
-                  }
-                }
-              }
-            }
-
-            if (keysToDelete.size > 0) {
-              await r2Client.send(
-                new DeleteObjectsCommand({
-                  Bucket: bucket,
-                  Delete: {
-                    Objects: Array.from(keysToDelete).map((Key) => ({ Key })),
-                    Quiet: true,
-                  },
-                })
-              );
-              console.log(`[Clerk Webhook] Cleaned up ${keysToDelete.size} R2 images for user ${existingUser.username}`);
-            }
-          } catch (r2Err) {
-            console.error("[Clerk Webhook] Error cleaning up R2 images (continuing with DB deletion):", r2Err);
-          }
-
+          // Keep immutable assets for recovery. Referenced URLs are not deletion permissions.
           await db.delete(users).where(eq(users._id, existingUser._id));
           console.log(`[Clerk Webhook] Successfully deleted user ${existingUser.username} (${existingUser._id}) and cascaded records.`);
         } else {

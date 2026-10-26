@@ -1,8 +1,9 @@
 "use server";
-import { db, client } from "@/lib/db";
-import { ensureDbInitialized } from "@/lib/db/init";
+import { db } from "@/lib/db";
+import { ownedAssetKey, uploadPrefix } from "@/lib/assets";
+import { z } from "zod";
 import { posts, comments, savedPosts, users } from "@/lib/db/schema";
-import { eq, and, ilike } from "drizzle-orm";
+import { eq, and, ilike, ne, or } from "drizzle-orm";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -55,6 +56,9 @@ export async function createPostAction(data: CreatePostData) {
     throw new Error(`Limite de publication atteinte. Veuillez patienter ${rate.reset} secondes avant de réessayer.`);
   }
 
+  data = z.object({ title: z.string().trim().min(3).max(150), desc: z.string().max(1000).optional(),
+    category: z.enum(['general', 'voyages', 'cuisine', 'animaux', 'astuces']),
+    img: z.string().max(2048).optional(), content: z.string().min(10).max(200000) }).parse(data);
   // Server-side Input Validation
   const trimmedTitle = data.title?.trim() || "";
   if (trimmedTitle.length < 3 || trimmedTitle.length > 150) {
@@ -76,72 +80,17 @@ export async function createPostAction(data: CreatePostData) {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 
-  let slug = cleanTitle;
-  let existing = await db.query.posts.findFirst({ where: eq(posts.slug, slug) });
-  let counter = 2;
-  while (existing) {
-    slug = `${cleanTitle}-${counter}`;
-    existing = await db.query.posts.findFirst({ where: eq(posts.slug, slug) });
-    counter++;
-  }
+  const slug = cleanTitle || crypto.randomUUID();
 
-  let finalImg = data.img || "";
-  let finalContent = data.content || "";
-
-  // Automatically ensure all images are in posts/${slug}/ on Cloudflare R2
-  try {
-    const { CopyObjectCommand, DeleteObjectCommand } = await import("@aws-sdk/client-s3");
-    const { r2Client } = await import("@/lib/r2");
-    const bucket = process.env.R2_BUCKET_NAME || "ohmyblog-uploads";
-    const publicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://pub-dc8f3ebfad6f443b920c49b37078af5c.r2.dev";
-    const targetFolder = `posts/${slug}`;
-
-    const moveR2Object = async (oldUrl: string): Promise<string> => {
-      if (!oldUrl.startsWith(publicUrl)) return oldUrl;
-      const oldKey = oldUrl.replace(`${publicUrl}/`, "");
-      const fileName = oldKey.split("/").pop() || "image.jpg";
-      const newKey = `${targetFolder}/${fileName}`;
-      if (oldKey === newKey) return oldUrl;
-
-      await r2Client.send(
-        new CopyObjectCommand({
-          Bucket: bucket,
-          CopySource: `${bucket}/${encodeURIComponent(oldKey)}`,
-          Key: newKey,
-        })
-      );
-      await r2Client.send(
-        new DeleteObjectCommand({
-          Bucket: bucket,
-          Key: oldKey,
-        })
-      );
-      return `${publicUrl}/${newKey}`;
-    };
-
-    // 1. Move cover image
-    if (finalImg && finalImg.startsWith(publicUrl)) {
-      finalImg = await moveR2Object(finalImg);
-    }
-
-    // 2. Move content images
-    const urlPattern = new RegExp(`${publicUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/[^\\s"'<>]+`, "g");
-    const matches = finalContent.match(urlPattern) || [];
-    for (const oldUrl of matches) {
-      const newUrl = await moveR2Object(oldUrl);
-      if (newUrl !== oldUrl) {
-        finalContent = finalContent.replaceAll(oldUrl, newUrl);
-      }
-    }
-  } catch (err) {
-    console.error("Erreur lors de l'organisation R2 des images de l'article:", err);
-  }
+  // Uploaded objects are immutable. Publishing never moves or deletes caller URLs.
+  const finalImg = data.img || '';
+  const finalContent = data.content;
 
   const newPost = {
     _id: crypto.randomUUID(),
     userId: user._id,
     slug,
-    title: data.title,
+    title: trimmedTitle,
     desc: data.desc,
     category: data.category,
     content: finalContent,
@@ -150,7 +99,13 @@ export async function createPostAction(data: CreatePostData) {
     updatedAt: new Date()
   };
 
-  await db.insert(posts).values(newPost);
+  let inserted = false;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const result = await db.insert(posts).values(newPost).onConflictDoNothing({ target: posts.slug }).returning({ id: posts._id });
+    if (result.length) { inserted = true; break; }
+    newPost.slug = `${slug}-${crypto.randomUUID()}`;
+  }
+  if (!inserted) throw new Error("Publication concurrente : réessaie.");
   revalidatePath('/');
   revalidatePath('/posts');
   revalidatePath('/sitemap.xml');
@@ -192,7 +147,7 @@ export async function addCommentAction(postId: string, desc: string) {
 export async function getCommentsAction(postId: string) {
   const fetchedComments = await db.query.comments.findMany({
     where: eq(comments.postId, postId),
-    with: { user: true },
+    with: { user: { columns: { username: true, img: true } } },
     orderBy: (comments, { desc }) => [desc(comments.createdAt)],
   });
   return fetchedComments;
@@ -253,63 +208,29 @@ export async function deletePostAction(postId: string) {
   const isOwner = post.userId === user._id;
   if (!isOwner && !isAdmin) throw new Error("Forbidden");
 
-  // 1. Delete associated images on Cloudflare R2
+  // The database FK cascade deletes comments/bookmarks atomically with the post.
+  await db.delete(posts).where(eq(posts._id, postId));
   try {
-    const { DeleteObjectsCommand, ListObjectsV2Command } = await import("@aws-sdk/client-s3");
-    const { r2Client } = await import("@/lib/r2");
-    const bucket = process.env.R2_BUCKET_NAME || "ohmyblog-uploads";
-    const publicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://pub-dc8f3ebfad6f443b920c49b37078af5c.r2.dev";
-
-    const keysToDelete: Set<string> = new Set();
-
-    // A. Check cover image
-    if (post.img && post.img.includes(publicUrl)) {
-      const key = post.img.replace(`${publicUrl}/`, "");
-      if (key) keysToDelete.add(key);
-    }
-
-    // B. Check images embedded in content
-    if (post.content) {
-      const urlPattern = new RegExp(`${publicUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/([^\\s"'<>]+)`, "g");
-      let match;
-      while ((match = urlPattern.exec(post.content)) !== null) {
-        if (match[1]) keysToDelete.add(match[1]);
+    const publicBase = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
+    if (publicBase) {
+      const urls = new Set([post.img || '', ...(post.content.match(/https?:[^\s"'<>]+/g) || [])]);
+      const keys: string[] = [];
+      // Legacy keys have no provable owner: preserve them rather than deleting another author's data.
+      for (const url of urls) {
+        const key = ownedAssetKey(url, user.clerkUserId, publicBase);
+        if (!key) continue;
+        const referenced = await db.query.posts.findFirst({ where: and(ne(posts._id, postId), or(eq(posts.img, url), ilike(posts.content, '%' + url.replaceAll('%', '\\%').replaceAll('_', '\\_') + '%'))) });
+        if (!referenced) keys.push(key);
+      }
+      if (keys.length) {
+        const { DeleteObjectsCommand } = await import('@aws-sdk/client-s3');
+        const { r2Client } = await import('@/lib/r2');
+        for (let offset = 0; offset < keys.length; offset += 1000) {
+          await r2Client.send(new DeleteObjectsCommand({ Bucket: process.env.R2_BUCKET_NAME || 'ohmyblog-uploads', Delete: { Objects: keys.slice(offset, offset + 1000).map((Key) => ({ Key })) } }));
+        }
       }
     }
-
-    // C. Also check if there's a folder posts/<slug>/ on R2
-    if (post.slug) {
-      const cleanSlugFolder = `posts/${post.slug.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9-_]/g, "-").toLowerCase()}/`;
-      const listRes = await r2Client.send(
-        new ListObjectsV2Command({
-          Bucket: bucket,
-          Prefix: cleanSlugFolder,
-        })
-      );
-      listRes.Contents?.forEach((obj) => {
-        if (obj.Key) keysToDelete.add(obj.Key);
-      });
-    }
-
-    // Execute bulk delete on Cloudflare R2
-    if (keysToDelete.size > 0) {
-      await r2Client.send(
-        new DeleteObjectsCommand({
-          Bucket: bucket,
-          Delete: {
-            Objects: Array.from(keysToDelete).map((Key) => ({ Key })),
-          },
-        })
-      );
-    }
-  } catch (err) {
-    console.error("Erreur lors de la suppression des images sur Cloudflare R2:", err);
-  }
-
-  // 2. Cascade delete (comments, bookmarks, and post)
-  await db.delete(comments).where(eq(comments.postId, postId));
-  await db.delete(savedPosts).where(eq(savedPosts.postId, postId));
-  await db.delete(posts).where(eq(posts._id, postId));
+  } catch (error) { console.error('Asset cleanup pending:', error); }
 
   revalidatePath("/");
   revalidatePath("/posts");
@@ -321,24 +242,25 @@ export async function deletePostAction(postId: string) {
 }
 
 export async function getPostsAction(page: number, searchParamsObj: Record<string, string>) {
-  await ensureDbInitialized(client);
   const conditions = [];
   if (searchParamsObj.cat) conditions.push(eq(posts.category, searchParamsObj.cat));
   if (searchParamsObj.search) conditions.push(ilike(posts.title, `%${searchParamsObj.search}%`));
   if (searchParamsObj.author) {
     const user = await db.query.users.findFirst({ where: eq(users.username, searchParamsObj.author) });
-    if (user) conditions.push(eq(posts.userId, user._id));
+    if (!user) return { posts: [], hasMore: false };
+    conditions.push(eq(posts.userId, user._id));
   }
   if (searchParamsObj.featured || searchParamsObj.sort === "featured") conditions.push(eq(posts.isFeatured, true));
   
-  const safePage = Math.max(1, page || 1);
+  const safePage = Number.isSafeInteger(page) && page > 0 ? Math.min(page, 10000) : 1;
   const parsedLimit = parseInt(searchParamsObj.limit) || 10;
   const limit = Math.min(Math.max(1, parsedLimit), 50);
   const offset = (safePage - 1) * limit;
 
   const fetchedPosts = await db.query.posts.findMany({
+    columns: { content: false },
     where: conditions.length > 0 ? and(...conditions) : undefined,
-    with: { user: true },
+    with: { user: { columns: { username: true, img: true } } },
     orderBy: (postsTable, { desc, asc }) => {
       if (searchParamsObj.sort === "oldest") return [asc(postsTable.createdAt)];
       if (searchParamsObj.sort === "popular") return [desc(postsTable.visit)];
@@ -373,10 +295,13 @@ export async function deleteCommentAction(commentId: string) {
   revalidatePath(`/[slug]`, "page");
 }
 
-export async function getPresignedUploadUrlAction(filename: string, contentType: string, folder?: string) {
+export async function getPresignedUploadUrlAction(filename: string, contentType: string, folder: string | undefined, size: number) {
+  if (folder !== undefined && (typeof folder !== "string" || folder.length > 150)) throw new Error("Dossier invalide.");
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
+  if (!Number.isSafeInteger(size) || size < 1 || size > 5 * 1024 * 1024) throw new Error('Fichier trop volumineux (max 5 Mo).');
+  if (typeof filename !== 'string' || filename.length > 200 || typeof contentType !== 'string') throw new Error('Fichier invalide.');
   // 1. Anti-spam Rate Limiting: Max 10 uploads per minute per user
   const { checkRateLimit } = await import("@/lib/rate-limit");
   const rate = checkRateLimit(`upload:${userId}`, 10, 60 * 1000);
@@ -391,14 +316,15 @@ export async function getPresignedUploadUrlAction(filename: string, contentType:
     "image/webp",
     "image/gif",
     "image/avif",
-    "image/svg+xml",
+    "video/mp4",
+    "video/webm",
   ];
   if (!ALLOWED_MIME_TYPES.includes(contentType.toLowerCase())) {
-    throw new Error("Type de fichier non autorisé. Seules les images (JPEG, PNG, WebP, GIF, AVIF, SVG) sont acceptées.");
+    throw new Error("Type de fichier non autorisé. Seules les images (JPEG, PNG, WebP, GIF, AVIF, MP4, WebM) sont acceptées.");
   }
 
   // 3. Strict File Extension Whitelist
-  const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "avif", "svg"];
+  const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "avif", "mp4", "webm"];
   const ext = filename.split(".").pop()?.toLowerCase() || "";
   if (!ALLOWED_EXTENSIONS.includes(ext)) {
     throw new Error("Extension de fichier non autorisée.");
@@ -416,6 +342,8 @@ export async function getPresignedUploadUrlAction(filename: string, contentType:
     .replace(/[^a-zA-Z0-9._-]/g, "-")
     .replace(/-+/g, "-");
 
+  const mimeExtensions: Record<string, string[]> = { 'image/jpeg': ['jpg', 'jpeg'], 'image/png': ['png'], 'image/webp': ['webp'], 'image/gif': ['gif'], 'image/avif': ['avif'], 'video/mp4': ['mp4'], 'video/webm': ['webm'] };
+  if (!mimeExtensions[contentType]?.includes(ext)) throw new Error('Le type et l’extension du fichier ne correspondent pas.');
   const cleanFilename = `${cleanBaseName}.${ext}`;
 
   const cleanFolder = folder
@@ -423,16 +351,17 @@ export async function getPresignedUploadUrlAction(filename: string, contentType:
     : "uploads";
 
   // Unique UUID prefix to prevent collisions and accidental file overwrites
-  const fileId = crypto.randomUUID().slice(0, 8);
-  const uniqueKey = `${cleanFolder}/${fileId}-${cleanFilename}`;
+  const fileId = crypto.randomUUID();
+  const uniqueKey = `${uploadPrefix(userId)}${cleanFolder}/${fileId}-${cleanFilename}`;
 
   const command = new PutObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME || "ohmyblog-uploads",
     Key: uniqueKey,
     ContentType: contentType,
+    ContentLength: size,
   });
 
-  const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 300 });
+  const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 300, signableHeaders: new Set(['content-length', 'content-type']) });
   const publicBaseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "https://pub-dc8f3ebfad6f443b920c49b37078af5c.r2.dev";
   const publicUrl = `${publicBaseUrl}/${uniqueKey}`;
 

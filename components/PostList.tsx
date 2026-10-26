@@ -4,7 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import PostListItem from "./PostListItem";
 import { useSearchParams } from "next/navigation";
 import { getPostsAction } from "@/app/actions";
-import { type PostWithUser } from "@/lib/db/schema";
+import { type PostPreview } from "@/lib/db/schema";
 
 const PostList = () => {
   const searchParams = useSearchParams();
@@ -76,7 +76,7 @@ const PostList = () => {
 
   return (
     <div className="space-y-4">
-      {allPosts.map((post: PostWithUser) => (
+      {allPosts.map((post: PostPreview) => (
         <PostListItem key={post._id} post={post} />
       ))}
 

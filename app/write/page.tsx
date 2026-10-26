@@ -1,6 +1,6 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
-import { useEditor, EditorContent, type Editor } from '@tiptap/react';
+import { useEditor, EditorContent, Node, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -16,6 +16,13 @@ import Underline from '@tiptap/extension-underline';
 import TiptapImage from '@tiptap/extension-image';
 import NextImage from "next/image";
 import Link from "next/link";
+
+const Video = Node.create({
+  name: 'video', group: 'block', atom: true,
+  addAttributes() { return { src: { default: null } }; },
+  parseHTML() { return [{ tag: 'video[src]' }]; },
+  renderHTML({ HTMLAttributes }) { return ['video', { ...HTMLAttributes, controls: '', preload: 'metadata', class: 'w-full rounded-2xl my-4' }]; },
+});
 
 const MenuBar = ({
   editor,
@@ -131,6 +138,7 @@ const Write = () => {
     extensions: [
       StarterKit,
       Underline,
+      Video,
       TiptapImage.configure({ inline: true, allowBase64: true }),
     ],
     content: '<p>Rédigez votre récit ici...</p>',
@@ -162,7 +170,7 @@ const Write = () => {
   };
 
   const handleVideoUpload = (data: { url: string }) => {
-    editor?.chain().focus().insertContent(`<p><iframe src="${data.url}" frameborder="0" allowfullscreen class="w-full aspect-video rounded-2xl my-4"></iframe></p>`).run();
+    editor?.chain().focus().insertContent({ type: 'video', attrs: { src: data.url } }).run();
     toast.success("Vidéo insérée !");
   };
 

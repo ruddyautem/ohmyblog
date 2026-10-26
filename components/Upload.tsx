@@ -43,7 +43,7 @@ const Upload = ({ children, type, folder, setProgress, setData }: UploadProps) =
       const { uploadUrl, publicUrl } = await getPresignedUploadUrlAction(
         file.name,
         file.type || "image/jpeg",
-        folder
+        folder, file.size
       );
 
       // 2. Direct upload to Cloudflare R2 via XMLHttpRequest with progress tracking
@@ -67,20 +67,26 @@ const Upload = ({ children, type, folder, setProgress, setData }: UploadProps) =
           });
           toast.success("Image uploadée avec succès sur Cloudflare R2 !");
         } else {
+          setProgress(0);
           toast.error(`Erreur d'upload vers Cloudflare R2 (${xhr.status})`);
         }
       };
 
       xhr.onerror = () => {
         setIsUploading(false);
+        setProgress(0);
         toast.error("Erreur réseau lors du téléversement");
       };
 
+      xhr.timeout = 60000;
+      xhr.ontimeout = xhr.onerror;
+      xhr.onabort = xhr.onerror;
       xhr.open("PUT", uploadUrl, true);
       xhr.setRequestHeader("Content-Type", file.type || "image/jpeg");
       xhr.send(file);
     } catch (err: unknown) {
       setIsUploading(false);
+      setProgress(0);
       const message = err instanceof Error ? err.message : "Échec de l'upload";
       toast.error(message);
     } finally {
@@ -98,7 +104,8 @@ const Upload = ({ children, type, folder, setProgress, setData }: UploadProps) =
         className="hidden"
         disabled={isUploading}
       />
-      <div
+      <div role="button" tabIndex={isUploading ? -1 : 0} aria-label={type === 'video' ? 'Ajouter une vidéo' : 'Ajouter une image'}
+        onKeyDown={(event) => { if (!isUploading && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); ref.current?.click(); } }}
         className={`cursor-pointer ${isUploading ? "opacity-50 pointer-events-none" : ""}`}
         onClick={() => ref.current?.click()}
       >

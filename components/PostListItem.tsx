@@ -3,9 +3,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "./Image";
 import { formatTimeAgo } from "@/lib/timeago-fr";
-import { type PostWithUser } from "@/lib/db/schema";
+import { type PostPreview } from "@/lib/db/schema";
 
-const PostListItem = ({ post }: { post: PostWithUser }) => {
+const PostListItem = ({ post }: { post: PostPreview }) => {
   const router = useRouter();
 
   return (

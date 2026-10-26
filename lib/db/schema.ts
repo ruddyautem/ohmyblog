@@ -70,8 +70,9 @@ export type CommentType = typeof comments.$inferSelect;
 export type SavedPostType = typeof savedPosts.$inferSelect;
 
 export type PostWithUser = PostType & {
-  user: UserType | null;
+  user: Pick<UserType, "username" | "img"> | null;
 };
+export type PostPreview = Omit<PostWithUser, "content">;
 
 export type CommentWithUser = CommentType & {
   user: {

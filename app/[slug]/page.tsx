@@ -3,9 +3,8 @@ import Image from "@/components/Image";
 import PostMenuActions from "@/components/PostMenuActions";
 import Comments from "@/components/Comments";
 import { formatTimeAgo } from "@/lib/timeago-fr";
-import DOMPurify from "isomorphic-dompurify";
-import { db, client } from "@/lib/db";
-import { ensureDbInitialized } from "@/lib/db/init";
+import { safeArticleHtml, safeJsonLd } from "@/lib/content";
+import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
@@ -14,12 +13,12 @@ import { getBaseUrl } from "@/lib/site-url";
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   try {
-    await ensureDbInitialized(client);
+
     const params = await props.params;
     const decodedSlug = decodeURIComponent(params.slug);
     const post = await db.query.posts.findFirst({
       where: eq(posts.slug, decodedSlug),
-      with: { user: true },
+      with: { user: { columns: { username: true, img: true } } },
     });
 
     if (!post) {
@@ -66,12 +65,12 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 }
 
 export default async function SinglePostPage(props: { params: Promise<{ slug: string }> }) {
-  await ensureDbInitialized(client);
+
   const params = await props.params;
   const decodedSlug = decodeURIComponent(params.slug);
   const post = await db.query.posts.findFirst({
     where: eq(posts.slug, decodedSlug),
-    with: { user: true }
+    with: { user: { columns: { username: true, img: true } } }
   });
 
   if (!post) {
@@ -81,11 +80,7 @@ export default async function SinglePostPage(props: { params: Promise<{ slug: st
   const baseUrl = getBaseUrl();
   const postUrl = `${baseUrl}/${encodeURIComponent(post.slug)}`;
 
-  // Fast server-side HTML sanitization with isomorphic-dompurify (allowing safe video iframes)
-  const cleanContent = DOMPurify.sanitize(post.content, {
-    ADD_TAGS: ["iframe"],
-    ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "class"],
-  });
+  const cleanContent = safeArticleHtml(post.content, process.env.NEXT_PUBLIC_R2_PUBLIC_URL);
 
   // Atomic background visit increment (non-blocking and safely caught)
   db.update(posts)
@@ -126,7 +121,7 @@ export default async function SinglePostPage(props: { params: Promise<{ slug: st
     <article className="mt-2 sm:mt-4 space-y-6 sm:space-y-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(blogPostingJsonLd) }}
       />
       {/* Article Header with Balanced Side Cover Image */}
       <header className="flex flex-col-reverse md:flex-row items-center justify-between gap-5 sm:gap-8 pb-5 sm:pb-6 border-b border-zinc-100 dark:border-slate-800">
